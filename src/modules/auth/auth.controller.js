@@ -8,7 +8,6 @@ module.exports = {
         try {
             const data = req.body;
             if (!data?.username || !data?.email || !data?.password || !data?.confirmPassword || !data?.provider) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-
             if (data.password !== data.confirmPassword) createHttpError(400, "Mật khẩu xác nhận không khớp!");
 
             await authService.signUp(data);
@@ -40,16 +39,18 @@ module.exports = {
         try {
             const data = req.body;
             if (!data?.email || !data?.tokenType || !data?.emailTemplate) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-
             if (!Object.values(tokenTypesConst).includes(data.tokenType)) createHttpError(400, "Dữ liệu tokenType đã cung cấp không hợp lệ!");
-
-            if (!Object.values(emailTemplatesConst).includes(data.emailTemplate)) createHttpError(400, "Dữ liệu emailTemplate đã cung cấp không hợp lệ!")
+            if (!Object.values(emailTemplatesConst).includes(data.emailTemplate)) createHttpError(400, "Dữ liệu emailTemplate đã cung cấp không hợp lệ!");
 
             await authService.sendAuthEmail(data);
 
+            let message = "";
+            if (data?.tokenType === tokenTypesConst.VERIFY_EMAIL) message = "Gửi email xác minh thành công! Vui lòng kiểm tra hộp thư để tiếp tục!";
+            else if (data?.tokenType === tokenTypesConst.RESET_PASSWORD) message = "Gửi email đặt lại mật khẩu thành công! Vui lòng kiểm tra hộp thư để tiếp tục!";
+
             return res.status(200).json({
                 success: true,
-                message: "Gửi email xác minh thành công! Vui lòng truy cập gmail để xác minh email!",
+                message
             });
         }
         catch (error) { next(error); }
@@ -66,6 +67,22 @@ module.exports = {
                 success: true,
                 message: "Đăng nhập thành công!",
                 data: result
+            });
+        }
+        catch (error) { next(error); }
+    },
+
+    resetPassword: async (req, res, next) => {
+        try {
+            const data = req.body;
+            if (!data?.password || !data?.confirmPassword || !data?.token) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (data.password !== data.confirmPassword) createHttpError(400, "Mật khẩu xác nhận không khớp!");
+
+            await authService.resetPassword(data);
+
+            return res.status(200).json({
+                success: true,
+                message: "Đặt lại mật khẩu thành công!"
             });
         }
         catch (error) { next(error); }

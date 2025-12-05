@@ -81,5 +81,19 @@ module.exports = {
                 ...options
             }
         );
+    },
+
+    updateAccountPassword: async (data, conditionData, options) => {
+        await Account.update(
+            {
+                password: data.password
+            },
+            {
+                where: {
+                    id: conditionData.id
+                },
+                ...options
+            }
+        );
     }
 }

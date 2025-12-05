@@ -95,9 +95,16 @@ module.exports = {
 
         try {
             const account = await authRepository.findAccountByEmail({ email: data.email });
-
             if (!account) createHttpError(404, "Email chưa được đăng ký!");
-            if (account.is_verified) createHttpError(409, "Email đã được xác minh!");
+
+            switch (data.tokenType) {
+                case tokenTypesConst.VERIFY_EMAIL:
+                    if (account.is_verified) createHttpError(409, "Email đã được xác minh!");
+                    break;
+                case tokenTypesConst.RESET_PASSWORD:
+                    if (!account.is_verified) createHttpError(409, "Email chưa được xác minh!");
+                    break;
+            }
 
             const authToken = generateRandomToken();
             const authTokenExpiredAt = moment().add(VERIFY_EMAIL_TOKEN_EXPIRES_IN, 'minutes').toDate();
@@ -145,7 +152,7 @@ module.exports = {
                 email: account.email,
                 rank: account.rank,
                 role: account.role,
-                type: account.type
+                provider: account.provider
             }, "5s");
 
             const refreshToken = signJwtToken({
@@ -157,5 +164,40 @@ module.exports = {
         catch (error) { throw error; }
     },
 
-    resetPassword: async (data) => { }
+    resetPassword: async (data) => {
+        const transaction = await sequelize.transaction();
+
+        try {
+            const account = await authRepository.findAccountByToken({
+                token: data.token,
+                tokenType: tokenTypesConst.RESET_PASSWORD
+            });
+
+            if (!account) createHttpError(400, "Liên kết đặt lại mật khẩu không hợp lệ!");
+
+            const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+            const nowUTC = moment().utc();
+
+            if (nowUTC.isAfter(tokenExpiredAtUTC)) createHttpError(400, "Liên kết đặt lại mật khẩu đã hết hạn!");
+
+            const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+
+            await authRepository.updateAccountPassword(
+                { password: hashedPassword },
+                { id: account.id },
+                { transaction: transaction }
+            );
+
+            await authRepository.clearAccountToken(
+                { id: account.id },
+                { transaction: transaction }
+            );
+
+            await transaction.commit();
+        }
+        catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
 };
