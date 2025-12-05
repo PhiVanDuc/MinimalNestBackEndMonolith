@@ -45,18 +45,21 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 defaultValue: "khach-hang"
             },
-            type: {
+            provider: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
             token: {
                 type: DataTypes.STRING
             },
+            token_type: {
+                type: DataTypes.STRING
+            },
             token_expired_at: {
                 type: DataTypes.DATE
             },
             is_verified: {
-                type: DataTypes.STRING,
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
             }

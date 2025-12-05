@@ -1,13 +1,17 @@
 const transporter = require("../../configs/transporter.config");
-const verificationEmailTokenTemplate = require("./verification-email-token-template");
+const verificationEmailTemplate = require("./verification-email-template");
+const resetPasswordEmailTemplate = require("./reset-password-email-template");
 
-const sendEmail = async (template, to, options) => {
+module.exports = async (emailTemplate, to, data) => {
     try {
         let content = { subject: "", html: "" };
 
-        switch (template) {
-            case "verificationEmailToken":
-                content = verificationEmailTokenTemplate(options.username, options.verificationEmailToken);
+        switch (emailTemplate) {
+            case "verificationEmail":
+                content = verificationEmailTemplate(data);
+                break;
+            case "resetPasswordEmail":
+                content = resetPasswordEmailTemplate(data);
                 break;
             default:
                 content = { subject: "", html: "" };
@@ -24,6 +28,4 @@ const sendEmail = async (template, to, options) => {
         console.error(error);
         throw new Error("Lỗi gửi email!");
     }
-}
-
-module.exports = sendEmail;
+};

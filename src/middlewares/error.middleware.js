@@ -1,4 +1,4 @@
-const errorMiddleware = (error, req, res, next) => {
+module.exports = (error, req, res, next) => {
     const status = error.status || 500;
     const message = error.message || "Lỗi server nội bộ!";
     const data = error.data;
@@ -12,6 +12,4 @@ const errorMiddleware = (error, req, res, next) => {
         message,
         ...(data ? { data } : {})
     });
-}
-
-module.exports = errorMiddleware;
+};

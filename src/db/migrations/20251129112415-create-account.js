@@ -34,18 +34,21 @@ module.exports = {
                 allowNull: false,
                 defaultValue: "khach-hang"
             },
-            type: {
+            provider: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
             token: {
                 type: Sequelize.STRING
             },
+            token_type: {
+                type: Sequelize.STRING
+            },
             token_expired_at: {
                 type: Sequelize.DATE
             },
             is_verified: {
-                type: Sequelize.STRING,
+                type: Sequelize.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
             },

@@ -1,36 +1,83 @@
 const { Account } = require("../../db/models/index");
 
 module.exports = {
-    findAccountByEmail: async (email) => {
-        return await Account.findOne({ where: { email: email } });
-    },
-
-    findAccountByToken: async (token) => {
-        return await Account.findOne({ where: { token: token } });
+    findAccountByEmail: async (conditionData) => {
+        return await Account.findOne(
+            {
+                where: {
+                    email: conditionData.email
+                }
+            }
+        );
     },
 
     createAccount: async (data, options) => {
-        await Account.create(data, options);
+        await Account.create(
+            {
+                username: data.username,
+                email: data.email,
+                password: data.password,
+                provider: data.provider,
+                token: data.token,
+                token_type: data.tokenType,
+                token_expired_at: data.tokenExpiredAt
+            },
+            { ...options }
+        );
     },
 
-    verifyAccount: async (id, options) => {
-        await Account.update(
-            { is_verified: true },
+    findAccountByToken: async (conditionData) => {
+        return await Account.findOne(
             {
-                where: { id: id },
+                where: {
+                    token: conditionData.token,
+                    token_type: conditionData.tokenType
+                }
+            }
+        );
+    },
+
+    updateAccountToken: async (data, conditionData, options) => {
+        await Account.update(
+            {
+                token: data.token,
+                token_type: data.tokenType,
+                token_expired_at: data.tokenExpiredAt
+            },
+            {
+                where: {
+                    id: conditionData.id
+                },
+                ...options
+            }
+        )
+    },
+
+    verifyAccount: async (conditionData, options) => {
+        await Account.update(
+            {
+                is_verified: true
+            },
+            {
+                where: {
+                    id: conditionData.id
+                },
                 ...options
             }
         );
     },
 
-    clearAccountToken: async (id, options) => {
+    clearAccountToken: async (conditionData, options) => {
         await Account.update(
             {
                 token: null,
+                token_type: null,
                 token_expired_at: null
             },
             {
-                where: { id: id },
+                where: {
+                    id: conditionData.id
+                },
                 ...options
             }
         );

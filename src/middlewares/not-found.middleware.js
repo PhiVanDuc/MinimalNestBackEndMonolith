@@ -1,4 +1,4 @@
-const notFoundMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
     console.log(`
     Không tìm thấy đường dẫn -- ${req.method} ${req.originalUrl}
     `);
@@ -7,6 +7,4 @@ const notFoundMiddleware = (req, res, next) => {
         status: 404,
         message: "Không tìm thấy đường dẫn!"
     });
-};
-
-module.exports = notFoundMiddleware;
+};;
