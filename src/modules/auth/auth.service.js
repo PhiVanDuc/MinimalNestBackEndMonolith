@@ -4,10 +4,10 @@ const { sequelize } = require("../../db/models/index");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
 
-const { signJwtToken } = require("../../libs/jwt");
 const sendEmail = require("../../libs/email/sendEmail");
-const createHttpError = require("../../utils/create-http-error");
+const throwHttpError = require("../../utils/throw-http-error");
 const tokenTypesConst = require("../../consts/token-types.const");
+const { signJwtToken, verifyJwtToken } = require("../../libs/jwt");
 const generateRandomToken = require("../../utils/generate-random-token");
 const emailTemplatesConst = require("../../consts/email-templates.const");
 
@@ -19,8 +19,8 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const account = await authRepository.findAccountByEmail({ email: data.email });
-            if (account) createHttpError(409, "Email đã được đăng ký!");
+            const account = await authRepository.findAccountByEmail(data.email);
+            if (account) throwHttpError(409, "Email đã được đăng ký!");
 
             const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
             const authToken = generateRandomToken();
@@ -33,8 +33,8 @@ module.exports = {
                     password: hashedPassword,
                     provider: data.provider,
                     token: authToken,
-                    tokenType: tokenTypesConst.VERIFY_EMAIL,
-                    tokenExpiredAt: authTokenExpiredAt
+                    token_type: tokenTypesConst.VERIFY_EMAIL,
+                    token_expired_at: authTokenExpiredAt
                 },
                 { transaction: transaction }
             );
@@ -56,66 +56,56 @@ module.exports = {
         }
     },
 
-    verifyEmail: async (data) => {
-        const transaction = await sequelize.transaction();
+    signIn: async (data) => {
+        const account = await authRepository.findAccountByEmail(data.email);
+        if (!account) throwHttpError(401, "Email hoặc mật khẩu không đúng!");
+        if (!account.is_verified) throwHttpError(401, "Email chưa được xác minh!");
 
-        try {
-            const account = await authRepository.findAccountByToken({
-                token: data.token,
-                tokenType: tokenTypesConst.VERIFY_EMAIL
-            });
+        const isPasswordValid = await bcrypt.compare(data.password, account.password);
+        if (!isPasswordValid) throwHttpError(401, "Email hoặc mật khẩu không đúng!");
 
-            if (!account) createHttpError(400, "Liên kết xác minh email không hợp lệ!");
+        const accessToken = signJwtToken({
+            id: account.id,
+            username: account.username,
+            email: account.email,
+            rank: account.rank,
+            role: account.role,
+            provider: account.provider
+        }, "5s");
 
-            const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
-            const nowUTC = moment().utc();
+        const refreshToken = signJwtToken({
+            id: account.id
+        }, "1h");
 
-            if (nowUTC.isAfter(tokenExpiredAtUTC)) createHttpError(400, "Liên kết xác minh email đã hết hạn!");
-
-            await authRepository.verifyAccount(
-                { id: account.id },
-                { transaction: transaction }
-            );
-
-            await authRepository.clearAccountToken(
-                { id: account.id },
-                { transaction: transaction }
-            );
-
-            await transaction.commit();
-        }
-        catch (error) {
-            await transaction.rollback();
-            throw error;
-        }
+        return { accessToken, refreshToken };
     },
 
     sendAuthEmail: async (data) => {
         const transaction = await sequelize.transaction();
 
         try {
-            const account = await authRepository.findAccountByEmail({ email: data.email });
-            if (!account) createHttpError(404, "Email chưa được đăng ký!");
+            const account = await authRepository.findAccountByEmail(data.email);
+            if (!account) throwHttpError(404, "Email chưa được đăng ký!");
 
             switch (data.tokenType) {
                 case tokenTypesConst.VERIFY_EMAIL:
-                    if (account.is_verified) createHttpError(409, "Email đã được xác minh!");
+                    if (account.is_verified) throwHttpError(409, "Email đã được xác minh!");
                     break;
                 case tokenTypesConst.RESET_PASSWORD:
-                    if (!account.is_verified) createHttpError(409, "Email chưa được xác minh!");
+                    if (!account.is_verified) throwHttpError(409, "Email chưa được xác minh!");
                     break;
             }
 
             const authToken = generateRandomToken();
             const authTokenExpiredAt = moment().add(VERIFY_EMAIL_TOKEN_EXPIRES_IN, 'minutes').toDate();
 
-            await authRepository.updateAccountToken(
+            await authRepository.updateAccount(
                 {
                     token: authToken,
-                    tokenType: data.tokenType,
-                    tokenExpiredAt: authTokenExpiredAt
+                    token_type: data.tokenType,
+                    token_expired_at: authTokenExpiredAt
                 },
-                { id: account.id },
+                account.id,
                 { transaction: transaction }
             );
 
@@ -136,68 +126,69 @@ module.exports = {
         }
     },
 
-    signIn: async (data) => {
-        try {
-            const account = await authRepository.findAccountByEmail({ email: data.email });
+    verifyEmail: async (data) => {
+        const account = await authRepository.findAccountByToken(data.token, tokenTypesConst.VERIFY_EMAIL);
+        if (!account) throwHttpError(400, "Liên kết xác minh email không hợp lệ!");
 
-            if (!account) createHttpError(401, "Email hoặc mật khẩu không đúng!");
-            if (!account.is_verified) createHttpError(401, "Email chưa được xác minh!");
+        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+        const nowUTC = moment().utc();
 
-            const isPasswordValid = await bcrypt.compare(data.password, account.password);
-            if (!isPasswordValid) createHttpError(401, "Email hoặc mật khẩu không đúng!");
+        if (nowUTC.isAfter(tokenExpiredAtUTC)) throwHttpError(400, "Liên kết xác minh email đã hết hạn!");
 
-            const accessToken = signJwtToken({
-                id: account.id,
-                username: account.username,
-                email: account.email,
-                rank: account.rank,
-                role: account.role,
-                provider: account.provider
-            }, "5s");
-
-            const refreshToken = signJwtToken({
-                id: account.id
-            }, "1h");
-
-            return { accessToken, refreshToken };
-        }
-        catch (error) { throw error; }
+        await authRepository.updateAccount(
+            {
+                token: null,
+                token_type: null,
+                token_expired_at: null,
+                is_verified: true
+            },
+            account.id
+        );
     },
 
     resetPassword: async (data) => {
-        const transaction = await sequelize.transaction();
+        const account = await authRepository.findAccountByToken(data.token, tokenTypesConst.RESET_PASSWORD);
+        if (!account) throwHttpError(400, "Liên kết đặt lại mật khẩu không hợp lệ!");
 
-        try {
-            const account = await authRepository.findAccountByToken({
-                token: data.token,
-                tokenType: tokenTypesConst.RESET_PASSWORD
-            });
+        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+        const nowUTC = moment().utc();
 
-            if (!account) createHttpError(400, "Liên kết đặt lại mật khẩu không hợp lệ!");
+        if (nowUTC.isAfter(tokenExpiredAtUTC)) throwHttpError(400, "Liên kết đặt lại mật khẩu đã hết hạn!");
+        const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
-            const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
-            const nowUTC = moment().utc();
+        await authRepository.updateAccount(
+            {
+                token: null,
+                token_type: null,
+                token_expired_at: null,
+                password: hashedPassword
+            },
+            account.id
+        );
+    },
 
-            if (nowUTC.isAfter(tokenExpiredAtUTC)) createHttpError(400, "Liên kết đặt lại mật khẩu đã hết hạn!");
+    refreshTokens: async (data) => {
+        const verified = verifyJwtToken(data.refreshToken);
 
-            const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+        if (verified.isExpired) throwHttpError(401, "Hết hạn phiên đăng nhập!");
+        if (verified.isInvalid) throwHttpError(401, "Refresh token không hợp lệ!");
 
-            await authRepository.updateAccountPassword(
-                { password: hashedPassword },
-                { id: account.id },
-                { transaction: transaction }
-            );
+        const account = await authRepository.findAccountById(verified.decoded.id);
+        if (!account) throwHttpError(401, "Không tìm thấy tài khoản!");
 
-            await authRepository.clearAccountToken(
-                { id: account.id },
-                { transaction: transaction }
-            );
+        const accessToken = signJwtToken({
+            id: account.id,
+            username: account.username,
+            email: account.email,
+            rank: account.rank,
+            role: account.role,
+            provider: account.provider
+        }, "5s");
 
-            await transaction.commit();
-        }
-        catch (error) {
-            await transaction.rollback();
-            throw error;
-        }
+        const refreshToken = signJwtToken({
+            id: account.id
+        }, "1h");
+
+        return { accessToken, refreshToken };
     }
 };

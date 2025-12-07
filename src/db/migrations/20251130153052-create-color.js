@@ -14,13 +14,16 @@ module.exports = {
             },
             name: {
                 type: Sequelize.STRING,
-                allowNull: false,
-                unique: true
+                allowNull: false
             },
             slug: {
                 type: Sequelize.STRING,
                 allowNull: false,
                 unique: true
+            },
+            color_code: {
+                type: Sequelize.STRING,
+                allowNull: false
             },
             created_at: {
                 allowNull: false,

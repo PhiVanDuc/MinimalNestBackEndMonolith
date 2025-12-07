@@ -7,6 +7,7 @@ const corsConfig = require('./src/configs/cors.config');
 
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const notFoundMiddleware = require("./src/middlewares/not-found.middleware");
+const deepTrimMiddleware = require("./src/middlewares/deep-trim.middleware");
 
 const indexRoutes = require("./src/routes/index.routes");
 const apiRoutes = require("./src/routes/api.routes");
@@ -19,6 +20,9 @@ app.use(cors(corsConfig));
 // Middleware chuyển đổi dữ liệu request body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware loại bỏ khoảng trắng dư thừa từ chuỗi trong request body
+app.use(deepTrimMiddleware);
 
 // Middleware logger
 app.use(morgan('dev'));

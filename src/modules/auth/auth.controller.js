@@ -1,5 +1,5 @@
 const authService = require("./auth.service");
-const createHttpError = require("../../utils/create-http-error");
+const throwHttpError = require("../../utils/throw-http-error");
 const tokenTypesConst = require("../../consts/token-types.const");
 const emailTemplatesConst = require("../../consts/email-templates.const");
 
@@ -7,8 +7,8 @@ module.exports = {
     signUp: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.username || !data?.email || !data?.password || !data?.confirmPassword || !data?.provider) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-            if (data.password !== data.confirmPassword) createHttpError(400, "Mật khẩu xác nhận không khớp!");
+            if (!data?.username || !data?.email || !data?.password || !data?.confirmPassword || !data?.provider) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (data.password !== data.confirmPassword) throwHttpError(400, "Mật khẩu xác nhận không khớp!");
 
             await authService.signUp(data);
 
@@ -20,16 +20,17 @@ module.exports = {
         catch (error) { next(error); }
     },
 
-    verifyEmail: async (req, res, next) => {
+    signIn: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.token) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!data?.email || !data?.password) throwHttpError(400, "Vui lòng cung cấp đủ Email và mật khẩu!");
 
-            await authService.verifyEmail(data);
+            const result = await authService.signIn(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Xác minh email thành công!"
+                message: "Đăng nhập thành công!",
+                data: result
             });
         }
         catch (error) { next(error); }
@@ -38,9 +39,9 @@ module.exports = {
     sendAuthEmail: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.email || !data?.tokenType || !data?.emailTemplate) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-            if (!Object.values(tokenTypesConst).includes(data.tokenType)) createHttpError(400, "Dữ liệu tokenType đã cung cấp không hợp lệ!");
-            if (!Object.values(emailTemplatesConst).includes(data.emailTemplate)) createHttpError(400, "Dữ liệu emailTemplate đã cung cấp không hợp lệ!");
+            if (!data?.email || !data?.tokenType || !data?.emailTemplate) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!Object.values(tokenTypesConst).includes(data.tokenType)) throwHttpError(400, "Dữ liệu tokenType đã cung cấp không hợp lệ!");
+            if (!Object.values(emailTemplatesConst).includes(data.emailTemplate)) throwHttpError(400, "Dữ liệu emailTemplate đã cung cấp không hợp lệ!");
 
             await authService.sendAuthEmail(data);
 
@@ -56,17 +57,16 @@ module.exports = {
         catch (error) { next(error); }
     },
 
-    signIn: async (req, res, next) => {
+    verifyEmail: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.email || !data?.password) createHttpError(400, "Vui lòng cung cấp đủ Email và mật khẩu!");
+            if (!data?.token) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            const result = await authService.signIn(data);
+            await authService.verifyEmail(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Đăng nhập thành công!",
-                data: result
+                message: "Xác minh email thành công!"
             });
         }
         catch (error) { next(error); }
@@ -75,14 +75,30 @@ module.exports = {
     resetPassword: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.password || !data?.confirmPassword || !data?.token) createHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-            if (data.password !== data.confirmPassword) createHttpError(400, "Mật khẩu xác nhận không khớp!");
+            if (!data?.password || !data?.confirmPassword || !data?.token) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (data.password !== data.confirmPassword) throwHttpError(400, "Mật khẩu xác nhận không khớp!");
 
             await authService.resetPassword(data);
 
             return res.status(200).json({
                 success: true,
                 message: "Đặt lại mật khẩu thành công!"
+            });
+        }
+        catch (error) { next(error); }
+    },
+
+    refreshTokens: async (req, res, next) => {
+        try {
+            const data = req.body;
+            if (!data?.refreshToken) throwHttpError(401, "Refresh token không hợp lệ!");
+
+            const result = await authService.refreshTokens(data);
+
+            return res.status(200).json({
+                success: true,
+                message: "Làm mới các token thành công!",
+                data: result
             });
         }
         catch (error) { next(error); }

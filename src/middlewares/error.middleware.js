@@ -6,6 +6,7 @@ module.exports = (error, req, res, next) => {
     console.log(`
     Lỗi server nội bộ: ${message}
     `);
+    console.log(error);
 
     res.status(status).json({
         status,

@@ -25,8 +25,9 @@ module.exports = async (emailTemplate, to, data) => {
             html: content.html,
         });
     }
-    catch (error) {
-        console.error(error);
-        throw new Error("Lỗi gửi email!");
+    catch (err) {
+        const error = new Error(`Lỗi gửi email -- ${err.message}`);
+        error.status = 500;
+        throw error;
     }
 };
