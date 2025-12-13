@@ -1,11 +1,14 @@
 const colorService = require("./color.service");
-const colorRepository = require("./color.repository");
 const throwHttpError = require("../../utils/throw-http-error");
+const isPositiveIntegerString = require("../../utils/is-positive-integer-string");
 
 module.exports = {
     getColors: async (req, res, next) => {
         try {
             const data = req.query;
+
+            if ((data.page && !isPositiveIntegerString(data.page)) || (data.limit && !isPositiveIntegerString(data.limit))) throwHttpError(400, "Dữ liệu page hoặc limit đã cung cấp không hợp lệ!");
+
             const result = await colorService.getColors(data);
 
             return res.status(200).json({
@@ -22,7 +25,7 @@ module.exports = {
             const data = req.params;
             if (!data?.id) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            const result = await colorRepository.findColorById(data.id);
+            const result = await colorService.getColor(data);
 
             return res.status(200).json({
                 success: true,
@@ -50,11 +53,10 @@ module.exports = {
 
     updateColor: async (req, res, next) => {
         try {
-            const params = req.params;
-            const data = req.body;
-            if (!params?.id || !data?.name || !data.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            const data = { ...req.params, ...req.body }
+            if (!data?.id || !data?.name || !data.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            await colorService.updateColor({ ...params, ...data });
+            await colorService.updateColor(data);
 
             return res.status(200).json({
                 success: true,

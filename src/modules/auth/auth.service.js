@@ -26,8 +26,8 @@ module.exports = {
             const authToken = generateRandomToken();
             const authTokenExpiredAt = moment().add(VERIFY_EMAIL_TOKEN_EXPIRES_IN, 'minutes').toDate();
 
-            await authRepository.createAccount(
-                {
+            await authRepository.createAccount({
+                data: {
                     username: data.username,
                     email: data.email,
                     password: hashedPassword,
@@ -36,8 +36,8 @@ module.exports = {
                     token_type: tokenTypesConst.VERIFY_EMAIL,
                     token_expired_at: authTokenExpiredAt
                 },
-                { transaction: transaction }
-            );
+                options: { transaction }
+            });
 
             await sendEmail(
                 emailTemplatesConst.VERIFICATION_EMAIL,
@@ -99,15 +99,15 @@ module.exports = {
             const authToken = generateRandomToken();
             const authTokenExpiredAt = moment().add(VERIFY_EMAIL_TOKEN_EXPIRES_IN, 'minutes').toDate();
 
-            await authRepository.updateAccount(
-                {
+            await authRepository.updateAccount({
+                id: account.id,
+                data: {
                     token: authToken,
                     token_type: data.tokenType,
                     token_expired_at: authTokenExpiredAt
                 },
-                account.id,
-                { transaction: transaction }
-            );
+                options: { transaction }
+            });
 
             await sendEmail(
                 data.emailTemplate,
@@ -127,7 +127,11 @@ module.exports = {
     },
 
     verifyEmail: async (data) => {
-        const account = await authRepository.findAccountByToken(data.token, tokenTypesConst.VERIFY_EMAIL);
+        const account = await authRepository.findAccountByToken({
+            token: data.token,
+            tokenType: tokenTypesConst.VERIFY_EMAIL
+        });
+
         if (!account) throwHttpError(400, "Liên kết xác minh email không hợp lệ!");
 
         const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
@@ -135,19 +139,23 @@ module.exports = {
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) throwHttpError(400, "Liên kết xác minh email đã hết hạn!");
 
-        await authRepository.updateAccount(
-            {
+        await authRepository.updateAccount({
+            id: account.id,
+            data: {
                 token: null,
                 token_type: null,
                 token_expired_at: null,
                 is_verified: true
-            },
-            account.id
-        );
+            }
+        });
     },
 
     resetPassword: async (data) => {
-        const account = await authRepository.findAccountByToken(data.token, tokenTypesConst.RESET_PASSWORD);
+        const account = await authRepository.findAccountByToken({
+            token: data.token,
+            tokenType: tokenTypesConst.RESET_PASSWORD
+        });
+
         if (!account) throwHttpError(400, "Liên kết đặt lại mật khẩu không hợp lệ!");
 
         const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
@@ -156,15 +164,15 @@ module.exports = {
         if (nowUTC.isAfter(tokenExpiredAtUTC)) throwHttpError(400, "Liên kết đặt lại mật khẩu đã hết hạn!");
         const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
-        await authRepository.updateAccount(
-            {
+        await authRepository.updateAccount({
+            id: account.id,
+            data: {
                 token: null,
                 token_type: null,
                 token_expired_at: null,
                 password: hashedPassword
-            },
-            account.id
-        );
+            }
+        });
     },
 
     refreshTokens: async (data) => {

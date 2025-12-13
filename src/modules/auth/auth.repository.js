@@ -9,21 +9,21 @@ module.exports = {
         return Account.findOne({ where: { email } });
     },
 
-    findAccountByToken: async (token, tokenType) => {
+    findAccountByToken: async ({ token, tokenType } = {}) => {
         return Account.findOne({ where: { token, token_type: tokenType } });
     },
 
-    createAccount: async (data, options = {}) => {
+    createAccount: async ({ data, options = {} } = {}) => {
         return Account.create(data, options);
     },
 
-    updateAccount: async (data, id, options = {}) => {
+    updateAccount: async ({ id, data, options = {} } = {}) => {
         return Account.update(
             data,
             {
                 where: { id },
-                ...options,
-                returning: true
+                returning: true,
+                ...options
             }
         );
     },

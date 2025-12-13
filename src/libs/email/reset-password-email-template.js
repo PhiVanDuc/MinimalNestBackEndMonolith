@@ -1,4 +1,4 @@
-const DEV_FE_URL = process.env.DEV_FE_URL;
+const FE = process.env.FE;
 
 module.exports = (data) => {
     return {
@@ -16,7 +16,7 @@ module.exports = (data) => {
 
                         <p class="desc" style="margin: 0px; margin-bottom: 30px; color: #5a5a5a; font-size: 14px; line-height: 20px;">Vui lòng nhấp vào nút bên dưới để tiến hành quá trình đặt lại mật khẩu của bạn.</p>
 
-                        <a href="${DEV_FE_URL}/reset-password?token=${data.authToken}" target="_blank" style="display: inline-block; padding: 15px 25px; font-size: 15px; color: #ffffff; background-color: #12778A; border-radius: 5px; text-decoration: none; font-weight: 600;">
+                        <a href="${FE}/reset-password?token=${data.authToken}" target="_blank" style="display: inline-block; padding: 15px 25px; font-size: 15px; color: #ffffff; background-color: #12778A; border-radius: 5px; text-decoration: none; font-weight: 600;">
                             Đặt lại mật khẩu
                         </a>
                     </div>
