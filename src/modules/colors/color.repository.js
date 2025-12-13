@@ -1,8 +1,24 @@
 const { Color } = require("../../db/models/index");
+const { Op } = require("sequelize");
+
+const generateWhere = require("../../utils/generate-where");
 
 module.exports = {
-    findColorsPaginated: async (page, limit) => {
+    findColors: async (page, limit, filter) => {
+        if (!page && !limit && !filter) return Color.findAll();
+
+        const configWhere = {
+            name: (value) => {
+                return {
+                    [Op.iLike]: `%${value}%`
+                }
+            }
+        }
+
+        const where = generateWhere(filter, configWhere);
+
         const { count, rows } = await Color.findAndCountAll({
+            where,
             offset: (page - 1) * limit,
             limit,
             order: [["created_at", "DESC"]]
@@ -11,7 +27,7 @@ module.exports = {
         return {
             colors: rows,
             page: `${page}`,
-            totalPage: `${Math.ceil(count / limit)}`,
+            totalPage: `${Math.max(1, Math.ceil(count / limit))}`,
         }
     },
 

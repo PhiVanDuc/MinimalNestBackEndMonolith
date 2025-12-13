@@ -9,8 +9,8 @@ const errorMiddleware = require("./src/middlewares/error.middleware");
 const notFoundMiddleware = require("./src/middlewares/not-found.middleware");
 const deepTrimMiddleware = require("./src/middlewares/deep-trim.middleware");
 
-const indexRoutes = require("./src/routes/index.routes");
-const apiRoutes = require("./src/routes/api.routes");
+const indexRoute = require("./src/routes/index.route");
+const apiRoute = require("./src/routes/api.route");
 
 const app = express();
 
@@ -28,8 +28,8 @@ app.use(deepTrimMiddleware);
 app.use(morgan('dev'));
 
 // Sử dụng các route
-app.use("/", indexRoutes);
-app.use("/api", apiRoutes);
+app.use("/", indexRoute);
+app.use("/api", apiRoute);
 
 // Middleware bắt lỗi chung
 app.use(notFoundMiddleware);

@@ -3,13 +3,11 @@ module.exports = (error, req, res, next) => {
     const message = error.message || "Lỗi server nội bộ!";
     const data = error.data;
 
-    console.log(`
-    Lỗi server nội bộ: ${message}
-    `);
+    console.log("Đã xảy ra lỗi:");
     console.log(error);
 
     res.status(status).json({
-        status,
+        success: false,
         message,
         ...(data ? { data } : {})
     });

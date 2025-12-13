@@ -6,13 +6,11 @@ module.exports = {
     getColors: async (req, res, next) => {
         try {
             const data = req.query;
-            if (!data?.page) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-
-            const result = await colorRepository.findColorsPaginated(Number(data.page), 20);
+            const result = await colorService.getColors(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Lấy danh sách màu sắc đã phân trang thành công!",
+                message: "Lấy danh sách màu sắc thành công!",
                 data: result
             });
         }

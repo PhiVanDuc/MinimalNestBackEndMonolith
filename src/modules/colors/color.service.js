@@ -2,8 +2,24 @@ const colorRepository = require("./color.repository");
 
 const generateSlug = require("../../utils/generate-slug");
 const throwHttpError = require("../../utils/throw-http-error");
+const isPositiveIntegerString = require("../../utils/is-positive-integer-string");
 
 module.exports = {
+    getColors: async (data) => {
+        if (Object.keys(data || {}).length === 0) return colorRepository.findColors();
+
+        const page = data.page || "1";
+        const limit = data.limit || "20";
+        const filter = { name: decodeURIComponent(data.name || "") }
+
+        if (!isPositiveIntegerString(page) || !isPositiveIntegerString(limit)) throwHttpError(400, "Dữ liệu page hoặc limit đã cung cấp không hợp lệ!");
+        return colorRepository.findColors(Number(page), Number(limit), filter);
+    },
+
+    getColor: async (data) => {
+        return colorRepository.findColorById(data.id);
+    },
+
     addColor: async (data) => {
         const slug = generateSlug(data.name);
 
