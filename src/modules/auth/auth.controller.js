@@ -1,9 +1,41 @@
 const authService = require("./auth.service");
 const throwHttpError = require("../../utils/throw-http-error");
 const tokenTypesConst = require("../../consts/token-types.const");
-const emailTemplatesConst = require("../../consts/email-templates.const");
 
 module.exports = {
+    googleSignIn: async (req, res, next) => {
+        try {
+            const data = req.user;
+            if (!data?.email || !data?.username) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+
+            const token = await authService.googleSignIn(data);
+            res.redirect(`${process.env.FE}/google-sign-in?token=${token}`);
+        }
+        catch(error) {
+            const params = new URLSearchParams();
+            if (error?.message) params.set("message", error.message);
+
+            res.redirect(`${process.env.FE}/google-sign-in/failed?${params.toString()}`);
+            next(error);
+        }
+    },
+
+    googleExchange: async (req, res, next) => {
+        try {
+            const data = req.body;
+            if (!data?.token) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+
+            const result = await authService.googleExchange(data);
+
+            return res.status(200).json({
+                success: true,
+                message: "Đăng nhập thành công!",
+                data: result
+            });
+        }
+        catch(error) { next(error); }
+    },
+
     signUp: async (req, res, next) => {
         try {
             const data = req.body;
@@ -14,7 +46,7 @@ module.exports = {
 
             return res.status(201).json({
                 success: true,
-                message: "Đăng ký tài khoản thành công. Vui lòng truy cập gmail để xác minh email!",
+                message: "Đăng ký tài khoản thành công. Vui lòng kiểm tra hộp thư để tiếp tục!",
             });
         }
         catch (error) { next(error); }
@@ -23,7 +55,7 @@ module.exports = {
     signIn: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.email || !data?.password) throwHttpError(400, "Vui lòng cung cấp đủ Email và mật khẩu!");
+            if (!data?.email || !data?.password) throwHttpError(400, "Vui lòng cung cấp đủ email và mật khẩu!");
 
             const result = await authService.signIn(data);
 
@@ -39,9 +71,8 @@ module.exports = {
     sendAuthEmail: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.email || !data?.tokenType || !data?.emailTemplate) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!data?.email || !data?.tokenType) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
             if (!Object.values(tokenTypesConst).includes(data.tokenType)) throwHttpError(400, "Dữ liệu tokenType đã cung cấp không hợp lệ!");
-            if (!Object.values(emailTemplatesConst).includes(data.emailTemplate)) throwHttpError(400, "Dữ liệu emailTemplate đã cung cấp không hợp lệ!");
 
             await authService.sendAuthEmail(data);
 

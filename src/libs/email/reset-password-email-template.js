@@ -1,6 +1,6 @@
-const FE = process.env.FE;
-
 module.exports = (data) => {
+    const FE = process.env.FE;
+
     return {
         subject: "Minimal Nest - Đặt lại mật khẩu",
         html: `

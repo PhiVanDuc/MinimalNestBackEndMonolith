@@ -7,7 +7,10 @@ module.exports = {
         try {
             const data = req.query;
 
-            if ((data.page && !isPositiveIntegerString(data.page)) || (data.limit && !isPositiveIntegerString(data.limit))) throwHttpError(400, "Dữ liệu page hoặc limit đã cung cấp không hợp lệ!");
+            if (
+                (data.page && !isPositiveIntegerString(data.page)) ||
+                (data.limit && !isPositiveIntegerString(data.limit))
+            ) throwHttpError(400, "Dữ liệu page hoặc limit đã cung cấp không hợp lệ!");
 
             const result = await colorService.getColors(data);
 

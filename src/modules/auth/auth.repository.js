@@ -1,16 +1,25 @@
 const { Account } = require("../../db/models/index");
 
 module.exports = {
-    findAccountById: async (id) => {
-        return Account.findByPk(id);
+    findAccountById: async ({ id, options = {} } = {}) => {
+        return Account.findByPk(id, options);
     },
 
-    findAccountByEmail: async (email) => {
-        return Account.findOne({ where: { email } });
+    findAccountByEmail: async ({ email, options = {} } = {}) => {
+        return Account.findOne({
+            where: { email },
+            ...options
+        });
     },
 
-    findAccountByToken: async ({ token, tokenType } = {}) => {
-        return Account.findOne({ where: { token, token_type: tokenType } });
+    findAccountByToken: async ({ token, tokenType, options = {} } = {}) => {
+        return Account.findOne({
+            where: {
+                token,
+                token_type: tokenType
+            },
+            ...options
+        });
     },
 
     createAccount: async ({ data, options = {} } = {}) => {
@@ -22,7 +31,6 @@ module.exports = {
             data,
             {
                 where: { id },
-                returning: true,
                 ...options
             }
         );

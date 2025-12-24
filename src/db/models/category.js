@@ -31,7 +31,8 @@ module.exports = (sequelize, DataTypes) => {
             modelName: 'Category',
             tableName: 'categories',
             createdAt: 'created_at',
-            updatedAt: 'updated_at'
+            updatedAt: 'updated_at',
+            timestamps: true
         }
     );
 

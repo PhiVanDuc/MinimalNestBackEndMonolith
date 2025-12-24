@@ -4,6 +4,7 @@ const express = require("express");
 const morgan = require('morgan');
 const cors = require('cors');
 const corsConfig = require('./src/configs/cors.config');
+const passportConfig = require('./src/configs/passport.config');
 
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const notFoundMiddleware = require("./src/middlewares/not-found.middleware");
@@ -26,6 +27,9 @@ app.use(deepTrimMiddleware);
 
 // Middleware logger
 app.use(morgan('dev'));
+
+// Sử dụng passport
+app.use(passportConfig.initialize());
 
 // Sử dụng các route
 app.use("/", indexRoute);

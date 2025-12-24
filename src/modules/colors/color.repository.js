@@ -7,7 +7,7 @@ module.exports = {
     findColors: async ({ page, limit, filter, options = {} } = {}) => {
         if (!page && !limit && !filter) return Color.findAll(options);
 
-        const configWhere = {
+        const whereConfig = {
             name: (value) => {
                 return {
                     [Op.iLike]: `%${value}%`
@@ -15,9 +15,11 @@ module.exports = {
             }
         }
 
+        const whereResult = generateWhere(filter, whereConfig);
+
         return Color.findAndCountAll(
             {
-                where: generateWhere(filter, configWhere),
+                where: whereResult,
                 offset: (page - 1) * limit,
                 limit,
                 ...options
@@ -29,7 +31,7 @@ module.exports = {
         return Color.findByPk(id, options);
     },
 
-    findColorBySlug: async ({ slug: options = {} } = {}) => {
+    findColorBySlug: async ({ slug, options = {} } = {}) => {
         return Color.findOne({
             where: { slug },
             ...options
@@ -45,13 +47,15 @@ module.exports = {
             data,
             {
                 where: { id },
-                returning: true,
                 ...options
             }
         );
     },
 
-    destroyColor: async (id) => {
-        return Color.destroy({ where: { id } });
+    destroyColor: async ({ id, options = {} } = {}) => {
+        return Color.destroy({ 
+            where: { id },
+            ...options
+        });
     }
 }

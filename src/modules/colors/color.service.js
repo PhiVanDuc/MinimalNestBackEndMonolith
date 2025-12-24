@@ -5,11 +5,11 @@ const throwHttpError = require("../../utils/throw-http-error");
 module.exports = {
     getColors: async (data) => {
         const options = {
-            attributes: ["id", "name", "slug", "color_code"],
-            order: [["created_at", "DESC"]]
+            attributes: ["id", "name", "color_code"],
+            order: [["updated_at", "DESC"]]
         }
 
-        if (Object.keys(data || {}).length === 0) return colorRepository.findColors({ options });
+        if (!Object.keys(data || {}).length) return colorRepository.findColors({ options });
 
         const page = Number(data.page || "1");
         const limit = Number(data.limit || "20");
@@ -33,7 +33,6 @@ module.exports = {
 
     addColor: async (data) => {
         const slug = generateSlug(data.name);
-
         const color = await colorRepository.findColorBySlug({
             slug,
             options: { attributes: ["id"] }
@@ -43,8 +42,8 @@ module.exports = {
 
         await colorRepository.createColor({
             data: {
-                name: data.name,
                 slug,
+                name: data.name,
                 color_code: data.colorCode
             }
         });
@@ -52,30 +51,31 @@ module.exports = {
 
     updateColor: async (data) => {
         const slug = generateSlug(data.name);
-
         const color = await colorRepository.findColorById({
             id: data.id,
             options: { attributes: ["id"] }
         });
+
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
 
         const otherColor = await colorRepository.findColorBySlug({
             slug,
             options: { attributes: ["id"] }
         });
+
         if (otherColor && otherColor.id !== data.id) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
 
         await colorRepository.updateColor({
             id: data.id,
             data: {
+                slug,
                 name: data.name,
-                slug: slug,
                 color_code: data.colorCode
             }
         });
     },
 
     deleteColor: async (data) => {
-        await colorRepository.destroyColor(data.id);
+        await colorRepository.destroyColor({ id: data.id });
     }
 }
