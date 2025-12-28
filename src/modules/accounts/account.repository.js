@@ -1,15 +1,20 @@
-const { Color } = require("../../db/models/index");
+const { Account } = require("../../db/models/index");
 const { Op } = require("sequelize");
 
 const createBaseRepository = require("../base/base.repository");
-const baseRepository = createBaseRepository(Color);
+const baseRepository = createBaseRepository(Account);
 
 module.exports = {
     ...baseRepository,
 
-    findColors: async ({ page, limit, filter, options = {} } = {}) => {
+    findAccounts: async ({ page, limit, filter, options = {} } = {}) => {
         const whereConfig = {
-            name: (value) => {
+            username: (value) => {
+                return {
+                    [Op.iLike]: `%${value}%`
+                }
+            },
+            rank: (value) => {
                 return {
                     [Op.iLike]: `%${value}%`
                 }

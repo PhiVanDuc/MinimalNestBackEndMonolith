@@ -1,80 +1,80 @@
-const colorService = require("./color.service");
+const categoryService = require("./category.service");
 const throwHttpError = require("../../utils/throw-http-error");
 const isPositiveIntegerString = require("../../utils/is-positive-integer-string");
 
 module.exports = {
-    getColors: async (req, res, next) => {
+    getCategories: async (req, res, next) => {
         try {
             const data = req.query;
             if ((data.page && !isPositiveIntegerString(data.page)) || (data.limit && !isPositiveIntegerString(data.limit))) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
 
-            const result = await colorService.getColors(data);
+            const result = await categoryService.getCategories(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Lấy danh sách màu sắc thành công!",
+                message: "Lấy danh sách danh mục thành công!",
                 data: result
             });
         }
         catch (error) { next(error); }
     },
 
-    getColor: async (req, res, next) => {
+    getCategory: async (req, res, next) => {
         try {
             const data = req.params;
             if (!data?.id) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            const result = await colorService.getColor(data);
+            const result = await categoryService.getCategory(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Lấy màu sắc thành công!",
+                message: "Lấy danh mục thành công!",
                 data: result
             });
         }
         catch (error) { next(error); }
     },
 
-    addColor: async (req, res, next) => {
+    addCategory: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.name || !data.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!data?.name) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            await colorService.addColor(data);
+            await categoryService.addCategory(data);
 
             return res.status(201).json({
                 success: true,
-                message: "Thêm màu sắc thành công!"
+                message: "Thêm danh mục thành công!"
             });
         }
         catch (error) { next(error); }
     },
 
-    updateColor: async (req, res, next) => {
+    updateCategory: async (req, res, next) => {
         try {
             const data = { ...req.params, ...req.body }
-            if (!data?.id || !data?.name || !data.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!data?.id || !data?.name) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            await colorService.updateColor(data);
+            await categoryService.updateCategory(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Cập nhật màu sắc thành công!"
+                message: "Cập nhật danh mục thành công!"
             });
         }
         catch (error) { next(error); }
     },
 
-    deleteColor: async (req, res, next) => {
+    deleteCategory: async (req, res, next) => {
         try {
             const data = req.params;
             if (!data?.id) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            await colorService.deleteColor(data);
+            await categoryService.deleteCategory(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Xoá màu sắc thành công!"
+                message: "Xoá danh mục thành công!"
             });
         }
         catch (error) { next(error); }

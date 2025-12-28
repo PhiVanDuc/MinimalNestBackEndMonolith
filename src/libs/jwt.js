@@ -1,5 +1,4 @@
 const jsonwebtoken = require("jsonwebtoken");
-
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const signJwtToken = (payload, expiresIn) => jsonwebtoken.sign(payload, JWT_SECRET_KEY, { expiresIn });

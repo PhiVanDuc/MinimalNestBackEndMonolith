@@ -20,12 +20,12 @@ module.exports = {
         const exchangeToken = generateRandomToken();
         const exchangeTokenExpiredAt = moment().add(EXCHANGE_TOKEN_EXPIRES_IN, 'minutes').toDate();
 
-        const account = await authRepository.findAccountByEmail({ email: data.email });
+        const account = await authRepository.findByEmail({ email: data.email });
 
         if (account) {
             if (account.provider !== "google") throwHttpError(409, "Email này đã được đăng ký theo hình thức email và mật khẩu!");
             
-            await authRepository.updateAccount({
+            await authRepository.update({
                 id: account.id,
                 data: {
                     token: exchangeToken,
@@ -37,7 +37,7 @@ module.exports = {
             return exchangeToken;
         }
         else {
-            await authRepository.createAccount({
+            await authRepository.create({
                 data: {
                     username: data.username,
                     email: data.email,
@@ -54,7 +54,7 @@ module.exports = {
     },
 
     googleExchange: async (data) => {
-        const account = await authRepository.findAccountByToken({
+        const account = await authRepository.findByToken({
             token: data.token,
             tokenType: tokenTypesConst.EXCHANGE_GOOGLE,
             options: { attributes: ["id", "username", "email", "rank", "role", "provider", "is_verified"] }
@@ -62,7 +62,10 @@ module.exports = {
 
         if (!account) throwHttpError(400, "Liên kết trao đổi google không hợp lệ!");
 
-        await authRepository.updateAccount({
+        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+        const nowUTC = moment().utc();
+
+        await authRepository.update({
             id: account.id,
             data: {
                 token: null,
@@ -71,8 +74,6 @@ module.exports = {
             }
         });
 
-        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
-        const nowUTC = moment().utc();
         if (nowUTC.isAfter(tokenExpiredAtUTC)) throwHttpError(400, "Liên kết trao đổi google đã hết hạn!");
 
         const accessToken = signJwtToken({
@@ -93,7 +94,7 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const account = await authRepository.findAccountByEmail({
+            const account = await authRepository.findByEmail({
                 email: data.email,
                 options: { attributes: ["id"] }
             });
@@ -104,7 +105,7 @@ module.exports = {
             const authToken = generateRandomToken();
             const authTokenExpiredAt = moment().add(AUTH_TOKEN_EXPIRES_IN, 'minutes').toDate();
 
-            await authRepository.createAccount({
+            await authRepository.create({
                 data: {
                     username: data.username,
                     email: data.email,
@@ -135,7 +136,7 @@ module.exports = {
     },
 
     signIn: async (data) => {
-        const account = await authRepository.findAccountByEmail({
+        const account = await authRepository.findByEmail({
             email: data.email,
             options: { attributes: ["id", "username", "email", "password", "rank", "role", "provider", "is_verified"] }
         });
@@ -165,7 +166,7 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const account = await authRepository.findAccountByEmail({
+            const account = await authRepository.findByEmail({
                 email: data.email,
                 options: { attributes: ["id", "username", "provider", "is_verified"] }
             });
@@ -188,7 +189,7 @@ module.exports = {
                 ? emailTemplatesConst.VERIFICATION_EMAIL
                 : emailTemplatesConst.RESET_PASSWORD_EMAIL;
 
-            await authRepository.updateAccount({
+            await authRepository.update({
                 id: account.id,
                 data: {
                     token: authToken,
@@ -216,7 +217,7 @@ module.exports = {
     },
 
     verifyEmail: async (data) => {
-        const account = await authRepository.findAccountByToken({
+        const account = await authRepository.findByToken({
             token: data.token,
             tokenType: tokenTypesConst.VERIFY_EMAIL,
             options: { attributes: ["id", "token_expired_at"] }
@@ -228,7 +229,7 @@ module.exports = {
         const nowUTC = moment().utc();
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) {
-            await authRepository.updateAccount({
+            await authRepository.update({
                 id: account.id,
                 data: {
                     token: null,
@@ -240,7 +241,7 @@ module.exports = {
             throwHttpError(400, "Liên kết xác minh email đã hết hạn!");
         }
 
-        await authRepository.updateAccount({
+        await authRepository.update({
             id: account.id,
             data: {
                 token: null,
@@ -252,7 +253,7 @@ module.exports = {
     },
 
     resetPassword: async (data) => {
-        const account = await authRepository.findAccountByToken({
+        const account = await authRepository.findByToken({
             token: data.token,
             tokenType: tokenTypesConst.RESET_PASSWORD,
             options: { attributes: ["id", "token_expired_at"] }
@@ -264,7 +265,7 @@ module.exports = {
         const nowUTC = moment().utc();
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) {
-            await authRepository.updateAccount({
+            await authRepository.update({
                 id: account.id,
                 data: {
                     token: null,
@@ -278,7 +279,7 @@ module.exports = {
         
         const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
-        await authRepository.updateAccount({
+        await authRepository.update({
             id: account.id,
             data: {
                 token: null,
@@ -291,11 +292,10 @@ module.exports = {
 
     refreshTokens: async (data) => {
         const verified = verifyJwtToken(data.refreshToken);
+        if (verified.isExpired) throwHttpError(401, "Phiên đăng nhập chính đã hết hạn!");
+        if (verified.isInvalid) throwHttpError(401, "Phiên đăng nhập chính không hợp lệ!");
 
-        if (verified.isExpired) throwHttpError(401, "Hết hạn phiên đăng nhập!");
-        if (verified.isInvalid) throwHttpError(401, "Refresh token không hợp lệ!");
-
-        const account = await authRepository.findAccountById({
+        const account = await authRepository.findById({
             id: verified.decoded.id,
             options: { attributes: ["id", "username", "email", "rank", "role", "provider"] }
         });

@@ -1,13 +1,13 @@
-const { Color } = require("../../db/models/index");
+const { Category } = require("../../db/models/index");
 const { Op } = require("sequelize");
 
 const createBaseRepository = require("../base/base.repository");
-const baseRepository = createBaseRepository(Color);
+const baseRepository = createBaseRepository(Category);
 
 module.exports = {
     ...baseRepository,
 
-    findColors: async ({ page, limit, filter, options = {} } = {}) => {
+    findCategories: async ({ page, limit, filter, options = {} } = {}) => {
         const whereConfig = {
             name: (value) => {
                 return {

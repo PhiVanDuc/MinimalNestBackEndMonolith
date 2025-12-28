@@ -122,13 +122,13 @@ module.exports = {
     refreshTokens: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.refreshToken) throwHttpError(401, "Refresh token không hợp lệ!");
+            if (!data?.refreshToken) throwHttpError(401, "Không nhận được phiên đăng nhập chính!");
 
             const result = await authService.refreshTokens(data);
 
             return res.status(200).json({
                 success: true,
-                message: "Làm mới các token thành công!",
+                message: "Làm mới các phiên đăng nhập thành công!",
                 data: result
             });
         }

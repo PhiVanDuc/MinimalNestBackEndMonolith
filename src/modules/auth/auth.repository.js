@@ -1,18 +1,19 @@
 const { Account } = require("../../db/models/index");
 
-module.exports = {
-    findAccountById: async ({ id, options = {} } = {}) => {
-        return Account.findByPk(id, options);
-    },
+const createBaseRepository = require("../base/base.repository");
+const baseRepository = createBaseRepository(Account);
 
-    findAccountByEmail: async ({ email, options = {} } = {}) => {
+module.exports = {
+    ...baseRepository,
+
+    findByEmail: async ({ email, options = {} } = {}) => {
         return Account.findOne({
             where: { email },
             ...options
         });
     },
 
-    findAccountByToken: async ({ token, tokenType, options = {} } = {}) => {
+    findByToken: async ({ token, tokenType, options = {} } = {}) => {
         return Account.findOne({
             where: {
                 token,
@@ -20,19 +21,5 @@ module.exports = {
             },
             ...options
         });
-    },
-
-    createAccount: async ({ data, options = {} } = {}) => {
-        return Account.create(data, options);
-    },
-
-    updateAccount: async ({ id, data, options = {} } = {}) => {
-        return Account.update(
-            data,
-            {
-                where: { id },
-                ...options
-            }
-        );
     },
 }

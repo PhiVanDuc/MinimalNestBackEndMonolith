@@ -1,5 +1,5 @@
-module.exports = (filter, whereConfig) => {
-    if (!filter) return {};
+module.exports = (filter = {}, whereConfig = {}) => {
+    if (!Object.keys(filter).length) return {};
     const where = {};
 
     Object.keys(whereConfig).forEach(key => {

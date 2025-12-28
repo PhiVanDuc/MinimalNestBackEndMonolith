@@ -1,6 +1,9 @@
 const colorRepository = require("./color.repository");
+const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
+const isUniqueError = require("../../utils/is-unique-error");
 const throwHttpError = require("../../utils/throw-http-error");
+const formatReturnDataPagination = require("../../utils/format-return-data-pagination");
 
 module.exports = {
     getColors: async (data) => {
@@ -9,73 +12,73 @@ module.exports = {
             order: [["updated_at", "DESC"]]
         }
 
-        if (!Object.keys(data || {}).length) return colorRepository.findColors({ options });
-
         const page = Number(data.page || "1");
         const limit = Number(data.limit || "20");
-        const filter = { name: decodeURIComponent(data.name || "") }
+        const filterWhitelist = ["name"];
+        const filter = formatFilter(data, filterWhitelist);
 
         const { count, rows } = await colorRepository.findColors({ page, limit, filter, options });
-
-        return {
-            colors: rows,
-            page: page.toString(),
-            totalPage: Math.max(1, Math.ceil(count / limit)).toString(),
-        }
+        return formatReturnDataPagination({ rows: { colors: rows }, page, count, limit });
     },
 
     getColor: async (data) => {
-        return colorRepository.findColorById({
+        const color = await colorRepository.findById({
             id: data.id,
             options: { attributes: ["id", "name", "color_code"] }
         });
+
+        if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
+        return color;
     },
 
     addColor: async (data) => {
-        const slug = generateSlug(data.name);
-        const color = await colorRepository.findColorBySlug({
-            slug,
-            options: { attributes: ["id"] }
-        });
-
-        if (color) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
-
-        await colorRepository.createColor({
-            data: {
-                slug,
-                name: data.name,
-                color_code: data.colorCode
-            }
-        });
+        try {
+            await colorRepository.create({
+                data: {
+                    slug: generateSlug(data.name),
+                    name: data.name,
+                    color_code: data.colorCode
+                }
+            });
+        }
+        catch (error) {
+            if (isUniqueError(error)) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
+            throw error;
+        }
     },
 
     updateColor: async (data) => {
-        const slug = generateSlug(data.name);
-        const color = await colorRepository.findColorById({
+        try {
+            const color = await colorRepository.findById({
+                id: data.id,
+                options: { attributes: ["id"] }
+            });
+
+            if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
+
+            await colorRepository.update({
+                id: data.id,
+                data: {
+                    slug: generateSlug(data.name),
+                    name: data.name,
+                    color_code: data.colorCode
+                }
+            });
+        }
+        catch (error) {
+            if (isUniqueError(error)) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
+            throw error;
+        }
+    },
+
+    deleteColor: async (data) => {
+        const color = await colorRepository.findById({
             id: data.id,
             options: { attributes: ["id"] }
         });
 
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
 
-        const otherColor = await colorRepository.findColorBySlug({
-            slug,
-            options: { attributes: ["id"] }
-        });
-
-        if (otherColor && otherColor.id !== data.id) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
-
-        await colorRepository.updateColor({
-            id: data.id,
-            data: {
-                slug,
-                name: data.name,
-                color_code: data.colorCode
-            }
-        });
-    },
-
-    deleteColor: async (data) => {
-        await colorRepository.destroyColor({ id: data.id });
+        await colorRepository.destroy({ id: data.id });
     }
 }
