@@ -2,7 +2,7 @@
 
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('accounts', {
+        await queryInterface.createTable('products', {
             id: {
                 type: Sequelize.UUID,
                 primaryKey: true,
@@ -10,45 +10,38 @@ module.exports = {
                 unique: true,
                 defaultValue: Sequelize.UUIDV4
             },
-            username: {
+            name: {
                 type: Sequelize.STRING,
-                allowNull: false,
+                allowNull: false
             },
-            email: {
+            slug: {
                 type: Sequelize.STRING,
                 allowNull: false,
                 unique: true
             },
-            password: {
-                type: Sequelize.TEXT
+            desc: {
+                type: Sequelize.TEXT,
+                allowNull: false
             },
-            rank: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                defaultValue: "khach-moi"
+            cost_price: {
+                type: Sequelize.INTEGER,
+                allowNull: false
             },
-            role: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                defaultValue: "khach-hang"
+            interest_percent: {
+                type: Sequelize.INTEGER,
+                allowNull: false
             },
-            provider: {
+            discount_type: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
-            token: {
-                type: Sequelize.STRING
+            discount: {
+                type: Sequelize.INTEGER,
+                defaultValue: 0
             },
-            token_type: {
-                type: Sequelize.STRING
-            },
-            token_expired_at: {
-                type: Sequelize.DATE
-            },
-            is_verified: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
+            price: {
+                type: Sequelize.INTEGER,
+                allowNull: false
             },
             created_at: {
                 allowNull: false,
@@ -60,7 +53,8 @@ module.exports = {
             }
         });
     },
+    
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('accounts');
+        await queryInterface.dropTable('products');
     }
 };

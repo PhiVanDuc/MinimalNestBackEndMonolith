@@ -6,9 +6,9 @@ const throwHttpError = require("../../utils/throw-http-error");
 const formatReturnDataPagination = require("../../utils/format-return-data-pagination");
 
 module.exports = {
-    getColors: async (data) => {
+    getColors: async (data, attributes) => {
         const options = {
-            attributes: ["id", "name", "color_code"],
+            attributes: attributes,
             order: [["updated_at", "DESC"]]
         }
 
@@ -24,7 +24,7 @@ module.exports = {
     getColor: async (data) => {
         const color = await colorRepository.findById({
             id: data.id,
-            options: { attributes: ["id", "name", "color_code"] }
+            options: { attributes: ["id", "name", ["color_code", "colorCode"]] }
         });
 
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");

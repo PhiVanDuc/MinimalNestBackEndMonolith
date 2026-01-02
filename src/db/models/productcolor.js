@@ -3,23 +3,26 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class Color extends Model {
+    class ProductColor extends Model {
         static associate(models) {
-            Color.hasMany(models.ProductColor, {
-                foreignKey: "color_id",
-                as: "colors_products"
+            ProductColor.belongsTo(models.Product, {
+                foreignKey: "product_id",
+                as: "product"
             });
 
-            Color.belongsToMany(models.Product, {
-                through: models.ProductColor,
+            ProductColor.belongsTo(models.Color, {
                 foreignKey: "color_id",
-                otherKey: "product_id",
-                as: "products"
+                as: "color"
+            });
+
+            ProductColor.hasMany(models.ProductImage, {
+                foreignKey: "products_colors_id",
+                as: "product_images"
             });
         }
     }
 
-    Color.init(
+    ProductColor.init(
         {
             id: {
                 type: DataTypes.UUID,
@@ -28,29 +31,24 @@ module.exports = (sequelize, DataTypes) => {
                 unique: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            name: {
-                type: DataTypes.STRING,
+            product_id: {
+                type: DataTypes.UUID,
                 allowNull: false
             },
-            slug: {
-                type: DataTypes.STRING,
-                allowNull: false,
-                unique: true
-            },
-            color_code: {
-                type: DataTypes.STRING,
+            color_id: {
+                type: DataTypes.UUID,
                 allowNull: false
             }
         },
         {
             sequelize,
-            modelName: 'Color',
-            tableName: 'colors',
+            modelName: 'ProductColor',
+            tableName: 'products_colors',
             createdAt: 'created_at',
             updatedAt: 'updated_at',
             timestamps: true
         }
     );
-
-    return Color;
+    
+    return ProductColor;
 };

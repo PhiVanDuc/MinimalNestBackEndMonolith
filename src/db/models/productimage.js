@@ -3,23 +3,16 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    class Color extends Model {
+    class ProductImage extends Model {
         static associate(models) {
-            Color.hasMany(models.ProductColor, {
-                foreignKey: "color_id",
-                as: "colors_products"
-            });
-
-            Color.belongsToMany(models.Product, {
-                through: models.ProductColor,
-                foreignKey: "color_id",
-                otherKey: "product_id",
-                as: "products"
-            });
+            ProductImage.belongsTo(models.ProductColor, {
+                foreignKey: "products_colors_id",
+                as: "products_colors"
+            })
         }
     }
 
-    Color.init(
+    ProductImage.init(
         {
             id: {
                 type: DataTypes.UUID,
@@ -28,29 +21,32 @@ module.exports = (sequelize, DataTypes) => {
                 unique: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            name: {
+            products_colors_id: {
+                type: DataTypes.UUID,
+                allowNull: false
+            },
+            public_id: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            slug: {
-                type: DataTypes.STRING,
-                allowNull: false,
-                unique: true
+            url: {
+                type: DataTypes.TEXT,
+                allowNull: false
             },
-            color_code: {
+            role: {
                 type: DataTypes.STRING,
                 allowNull: false
             }
         },
         {
             sequelize,
-            modelName: 'Color',
-            tableName: 'colors',
+            modelName: 'ProductImage',
+            tableName: 'product_images',
             createdAt: 'created_at',
             updatedAt: 'updated_at',
             timestamps: true
         }
     );
-
-    return Color;
+    
+    return ProductImage;
 };

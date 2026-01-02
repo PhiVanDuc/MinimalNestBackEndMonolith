@@ -6,9 +6,9 @@ const throwHttpError = require("../../utils/throw-http-error");
 const formatReturnDataPagination = require("../../utils/format-return-data-pagination");
 
 module.exports = {
-    getCategories: async (data) => {
+    getCategories: async (data, attributes) => {
         const options = {
-            attributes: ["id", "name"],
+            attributes,
             order: [["updated_at", "DESC"]]
         }
 
@@ -24,7 +24,7 @@ module.exports = {
     getCategory: async (data) => {
         const category = await categoryRepository.findById({
             id: data.id,
-            options: { attributes: ["id", "name"] }
+            options: { attributes: ["name"] }
         });
 
         if (!category) throwHttpError(404, "Không tìm thấy danh mục!");

@@ -1,6 +1,7 @@
 const categoryService = require("./category.service");
 const throwHttpError = require("../../utils/throw-http-error");
 const isPositiveIntegerString = require("../../utils/is-positive-integer-string");
+const adminRoles = require("../../consts/roles.const");
 
 module.exports = {
     getCategories: async (req, res, next) => {
@@ -8,7 +9,13 @@ module.exports = {
             const data = req.query;
             if ((data.page && !isPositiveIntegerString(data.page)) || (data.limit && !isPositiveIntegerString(data.limit))) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
 
-            const result = await categoryService.getCategories(data);
+            const user = req.user;
+            const isAdmin = user && adminRoles.includes(user.role);
+            const attributes = isAdmin
+                ? ["id", "name"]
+                : ["id", "name", "slug"];
+
+            const result = await categoryService.getCategories(data, attributes);
 
             return res.status(200).json({
                 success: true,

@@ -46,7 +46,7 @@ module.exports = {
 
             return res.status(201).json({
                 success: true,
-                message: "Đăng ký tài khoản thành công. Vui lòng kiểm tra hộp thư để tiếp tục!",
+                message: "Vui lòng kiểm tra hộp thư để tiếp tục!",
             });
         }
         catch (error) { next(error); }
@@ -77,8 +77,8 @@ module.exports = {
             await authService.sendAuthEmail(data);
 
             let message = "";
-            if (data?.tokenType === tokenTypesConst.VERIFY_EMAIL) message = "Gửi email xác minh thành công! Vui lòng kiểm tra hộp thư để tiếp tục!";
-            else if (data?.tokenType === tokenTypesConst.RESET_PASSWORD) message = "Gửi email đặt lại mật khẩu thành công! Vui lòng kiểm tra hộp thư để tiếp tục!";
+            if (data?.tokenType === tokenTypesConst.VERIFY_EMAIL) message = "Vui lòng kiểm tra hộp thư để tiếp tục!";
+            else if (data?.tokenType === tokenTypesConst.RESET_PASSWORD) message = "Vui lòng kiểm tra hộp thư để tiếp tục!";
 
             return res.status(200).json({
                 success: true,

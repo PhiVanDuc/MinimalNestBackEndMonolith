@@ -2,7 +2,7 @@
 
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('colors', {
+        await queryInterface.createTable('product_images', {
             id: {
                 type: Sequelize.UUID,
                 primaryKey: true,
@@ -10,16 +10,23 @@ module.exports = {
                 unique: true,
                 defaultValue: Sequelize.UUIDV4
             },
-            name: {
+            products_colors_id: {
+                type: Sequelize.UUID,
+                allowNull: false,
+                references: {
+                    model: "products_colors",
+                    key: "id"
+                }
+            },
+            public_id: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
-            slug: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                unique: true
+            url: {
+                type: Sequelize.TEXT,
+                allowNull: false
             },
-            color_code: {
+            role: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
@@ -33,7 +40,8 @@ module.exports = {
             }
         });
     },
+
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('colors');
+        await queryInterface.dropTable('product_images');
     }
 };
