@@ -1,21 +1,12 @@
 const colorService = require("./color.service");
 const throwHttpError = require("../../utils/throw-http-error");
-const isPositiveIntegerString = require("../../utils/is-positive-integer-string");
-const adminRoles = require("../../consts/roles.const");
+const formatInputPagination = require("../../utils/format-input-pagination");
 
 module.exports = {
     getColors: async (req, res, next) => {
         try {
-            const data = req.query;
-            if ((data.page && !isPositiveIntegerString(data.page)) || (data.limit && !isPositiveIntegerString(data.limit))) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
-
-            const user = req.user;
-            const isAdmin = user && adminRoles.includes(user.role);
-            const attributes = isAdmin
-                ? ["id", "name", ["color_code", "colorCode"]]
-                : ["id", "name", "slug", ["color_code", "colorCode"]];
-
-            const result = await colorService.getColors(data, attributes);
+            const data = { ...req.query, ...formatInputPagination(req.query.page, req.query.limit) };
+            const result = await colorService.getColors(data);
 
             return res.status(200).json({
                 success: true,

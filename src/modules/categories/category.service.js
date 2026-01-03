@@ -1,34 +1,35 @@
+const humps = require("humps");
 const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
 const categoryRepository = require("./category.repository");
 const isUniqueError = require("../../utils/is-unique-error");
 const throwHttpError = require("../../utils/throw-http-error");
-const formatReturnDataPagination = require("../../utils/format-return-data-pagination");
+const formatOutputPagination = require("../../utils/format-output-pagination");
 
 module.exports = {
-    getCategories: async (data, attributes) => {
+    getCategories: async (data) => {
         const options = {
-            attributes,
+            attributes: ["id", "name", "slug"],
             order: [["updated_at", "DESC"]]
         }
 
-        const page = Number(data.page || "1");
-        const limit = Number(data.limit || "20");
+        const page = data.page;
+        const limit = data.limit;
         const filterWhitelist = ["name"];
         const filter = formatFilter(data, filterWhitelist);
 
         const { count, rows } = await categoryRepository.findCategories({ page, limit, filter, options });
-        return formatReturnDataPagination({ rows: { categories: rows }, page, count, limit });
+        return formatOutputPagination({ rows: { categories: humps.camelizeKeys(rows) }, page, count, limit });
     },
 
     getCategory: async (data) => {
         const category = await categoryRepository.findById({
             id: data.id,
-            options: { attributes: ["name"] }
+            options: { attributes: ["id", "name", "slug"] }
         });
 
         if (!category) throwHttpError(404, "Không tìm thấy danh mục!");
-        return category;
+        return humps.camelizeKeys(category);
     },
 
     addCategory: async (data) => {

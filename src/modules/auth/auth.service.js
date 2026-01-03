@@ -6,14 +6,14 @@ const moment = require("moment");
 
 const sendEmail = require("../../libs/email/sendEmail");
 const throwHttpError = require("../../utils/throw-http-error");
-const tokenTypesConst = require("../../consts/token-types.const");
-const { signJwtToken, verifyJwtToken } = require("../../libs/jwt");
+const { signJWTToken, verifyJWTToken } = require("../../libs/jwt");
 const generateRandomToken = require("../../utils/generate-random-token");
-const emailTemplatesConst = require("../../consts/email-templates.const");
 
 const SALT_ROUNDS = 10;
 const AUTH_TOKEN_EXPIRES_IN = 15;
-const EXCHANGE_TOKEN_EXPIRES_IN= 1;
+const EXCHANGE_TOKEN_EXPIRES_IN = 1;
+const TOKEN_TYPES = require("../../consts/token-types.const");
+const EMAIL_TEMPLATES = require("../../consts/email-templates.const");
 
 module.exports = {
     googleSignIn: async (data) => {
@@ -29,7 +29,7 @@ module.exports = {
                 id: account.id,
                 data: {
                     token: exchangeToken,
-                    token_type: tokenTypesConst.EXCHANGE_GOOGLE,
+                    token_type: TOKEN_TYPES.EXCHANGE_GOOGLE,
                     token_expired_at: exchangeTokenExpiredAt
                 }
             });
@@ -43,7 +43,7 @@ module.exports = {
                     email: data.email,
                     provider: data.provider,
                     token: exchangeToken,
-                    token_type: tokenTypesConst.EXCHANGE_GOOGLE,
+                    token_type: TOKEN_TYPES.EXCHANGE_GOOGLE,
                     token_expired_at: exchangeTokenExpiredAt,
                     is_verified: true
                 }
@@ -56,18 +56,13 @@ module.exports = {
     googleExchange: async (data) => {
         const account = await authRepository.findByToken({
             token: data.token,
-            tokenType: tokenTypesConst.EXCHANGE_GOOGLE,
-            options: {
-                attributes: [
-                    "id", "username", "email", "rank", "role", "provider",
-                    ["token_expired_at", "tokenExpiredAt"]
-                ]
-            }
+            tokenType: TOKEN_TYPES.EXCHANGE_GOOGLE,
+            options: { attributes: ["id", "username", "email", "rank", "role", "provider", "token_expired_at"] }
         });
 
         if (!account) throwHttpError(400, "Liên kết trao đổi google không hợp lệ!");
 
-        const tokenExpiredAtUTC = moment(account.tokenExpiredAt).utc();
+        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
         const nowUTC = moment().utc();
 
         await authRepository.update({
@@ -81,7 +76,7 @@ module.exports = {
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) throwHttpError(400, "Liên kết trao đổi google đã hết hạn!");
 
-        const accessToken = signJwtToken({
+        const accessToken = signJWTToken({
             id: account.id,
             username: account.username,
             email: account.email,
@@ -90,8 +85,7 @@ module.exports = {
             provider: account.provider
         }, "5m");
 
-        const refreshToken = signJwtToken({ id: account.id }, "7d");
-        
+        const refreshToken = signJWTToken({ id: account.id }, "7d");
         return { accessToken, refreshToken };
     },
 
@@ -117,14 +111,14 @@ module.exports = {
                     password: hashedPassword,
                     provider: data.provider,
                     token: authToken,
-                    token_type: tokenTypesConst.VERIFY_EMAIL,
+                    token_type: TOKEN_TYPES.VERIFY_EMAIL,
                     token_expired_at: authTokenExpiredAt
                 },
                 options: { transaction }
             });
 
             await sendEmail(
-                emailTemplatesConst.VERIFICATION_EMAIL,
+                EMAIL_TEMPLATES.VERIFICATION_EMAIL,
                 data.email,
                 {
                     username: data.username,
@@ -143,22 +137,17 @@ module.exports = {
     signIn: async (data) => {
         const account = await authRepository.findByEmail({
             email: data.email,
-            options: {
-                attributes: [
-                    "id", "username", "email", "password", "rank", "role", "provider",
-                    ["is_verified", "isVerified"]
-                ]
-            }
+            options: { attributes: ["id", "username", "email", "password", "rank", "role", "provider", "is_verified"] }
         });
 
         if (!account) throwHttpError(401, "Email hoặc mật khẩu không đúng!");
-        if (!account.isVerified) throwHttpError(401, "Email chưa được xác minh!");
+        if (!account.is_verified) throwHttpError(401, "Email chưa được xác minh!");
         if (account && account.provider === "google") throwHttpError(409, "Email này được đăng ký theo hình thức google!");
 
         const isPasswordValid = await bcrypt.compare(data.password, account.password);
         if (!isPasswordValid) throwHttpError(401, "Email hoặc mật khẩu không đúng!");
 
-        const accessToken = signJwtToken({
+        const accessToken = signJWTToken({
             id: account.id,
             username: account.username,
             email: account.email,
@@ -167,8 +156,7 @@ module.exports = {
             provider: account.provider
         }, "5m");
 
-        const refreshToken = signJwtToken({ id: account.id }, "7d");
-
+        const refreshToken = signJWTToken({ id: account.id }, "7d");
         return { accessToken, refreshToken };
     },
 
@@ -178,31 +166,26 @@ module.exports = {
         try {
             const account = await authRepository.findByEmail({
                 email: data.email,
-                options: {
-                    attributes: [
-                        "id", "username", "provider",
-                        ["is_verified", "isVerified"]
-                    ]
-                }
+                options: { attributes: ["id", "username", "provider", "is_verified"] }
             });
 
             if (!account) throwHttpError(404, "Email chưa được đăng ký!");
-            if (account && account.provider === "google") throwHttpError(409, "Email này được đăng ký theo hình thức google!");
+            if (account.provider === "google") throwHttpError(409, "Email này được đăng ký theo hình thức google!");
 
             switch (data.tokenType) {
-                case tokenTypesConst.VERIFY_EMAIL:
-                    if (account.isVerified) throwHttpError(409, "Email đã được xác minh!");
+                case TOKEN_TYPES.VERIFY_EMAIL:
+                    if (account.is_verified) throwHttpError(409, "Email đã được xác minh!");
                     break;
-                case tokenTypesConst.RESET_PASSWORD:
-                    if (!account.isVerified) throwHttpError(409, "Email chưa được xác minh!");
+                case TOKEN_TYPES.RESET_PASSWORD:
+                    if (!account.is_verified) throwHttpError(409, "Email chưa được xác minh!");
                     break;
             }
 
             const authToken = generateRandomToken();
             const authTokenExpiredAt = moment().add(AUTH_TOKEN_EXPIRES_IN, 'minutes').toDate();
-            const emailTemplate = data.tokenType === tokenTypesConst.VERIFY_EMAIL
-                ? emailTemplatesConst.VERIFICATION_EMAIL
-                : emailTemplatesConst.RESET_PASSWORD_EMAIL;
+            const emailTemplate = data.tokenType === TOKEN_TYPES.VERIFY_EMAIL
+                ? EMAIL_TEMPLATES.VERIFICATION_EMAIL
+                : EMAIL_TEMPLATES.RESET_PASSWORD_EMAIL;
 
             await authRepository.update({
                 id: account.id,
@@ -234,18 +217,13 @@ module.exports = {
     verifyEmail: async (data) => {
         const account = await authRepository.findByToken({
             token: data.token,
-            tokenType: tokenTypesConst.VERIFY_EMAIL,
-            options: {
-                attributes: [
-                    "id",
-                    ["token_expired_at", "tokenExpiredAt"]
-                ]
-            }
+            tokenType: TOKEN_TYPES.VERIFY_EMAIL,
+            options: { attributes: ["id", "token_expired_at"] }
         });
 
         if (!account) throwHttpError(400, "Liên kết xác minh email không hợp lệ!");
 
-        const tokenExpiredAtUTC = moment(account.tokenExpiredAt).utc();
+        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
         const nowUTC = moment().utc();
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) {
@@ -275,18 +253,13 @@ module.exports = {
     resetPassword: async (data) => {
         const account = await authRepository.findByToken({
             token: data.token,
-            tokenType: tokenTypesConst.RESET_PASSWORD,
-            options: {
-                attributes: [
-                    "id",
-                    ["token_expired_at", "tokenExpiredAt"]
-                ]
-            }
+            tokenType: TOKEN_TYPES.RESET_PASSWORD,
+            options: { attributes: ["id", "token_expired_at"] }
         });
 
         if (!account) throwHttpError(400, "Liên kết đặt lại mật khẩu không hợp lệ!");
 
-        const tokenExpiredAtUTC = moment(account.tokenExpiredAt).utc();
+        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
         const nowUTC = moment().utc();
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) {
@@ -316,7 +289,7 @@ module.exports = {
     },
 
     refreshTokens: async (data) => {
-        const verified = verifyJwtToken(data.refreshToken);
+        const verified = verifyJWTToken(data.refreshToken);
         if (verified.isExpired) throwHttpError(401, "Phiên đăng nhập chính đã hết hạn!");
         if (verified.isInvalid) throwHttpError(401, "Phiên đăng nhập chính không hợp lệ!");
 
@@ -327,7 +300,7 @@ module.exports = {
 
         if (!account) throwHttpError(401, "Không tìm thấy tài khoản!");
 
-        const accessToken = signJwtToken({
+        const accessToken = signJWTToken({
             id: account.id,
             username: account.username,
             email: account.email,
@@ -336,7 +309,7 @@ module.exports = {
             provider: account.provider
         }, "5m");
 
-        const refreshToken = signJwtToken({ id: account.id }, "7d");
+        const refreshToken = signJWTToken({ id: account.id }, "7d");
         return { accessToken, refreshToken };
     }
 };

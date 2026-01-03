@@ -1,9 +1,9 @@
 const jsonwebtoken = require("jsonwebtoken");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
-const signJwtToken = (payload, expiresIn) => jsonwebtoken.sign(payload, JWT_SECRET_KEY, { expiresIn });
+const signJWTToken = (payload, expiresIn) => jsonwebtoken.sign(payload, JWT_SECRET_KEY, { expiresIn });
 
-const verifyJwtToken = (jwtToken) => {
+const verifyJWTToken = (jwtToken) => {
     try {
         const decoded = jsonwebtoken.verify(jwtToken, JWT_SECRET_KEY);
 
@@ -28,4 +28,4 @@ const verifyJwtToken = (jwtToken) => {
     }
 }
 
-module.exports = { signJwtToken, verifyJwtToken };
+module.exports = { signJWTToken, verifyJWTToken };

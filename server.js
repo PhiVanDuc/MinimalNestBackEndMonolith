@@ -8,7 +8,7 @@ const passportConfig = require('./src/configs/passport.config');
 
 const errorMiddleware = require("./src/middlewares/error.middleware");
 const notFoundMiddleware = require("./src/middlewares/not-found.middleware");
-const deepTrimMiddleware = require("./src/middlewares/deep-trim.middleware");
+const trimMiddleware = require("./src/middlewares/trim.middleware");
 
 const indexRoute = require("./src/routes/index.route");
 const apiRoute = require("./src/routes/api.route");
@@ -21,9 +21,7 @@ app.use(cors(corsConfig));
 // Middleware chuyển đổi dữ liệu request body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Middleware loại bỏ khoảng trắng dư thừa từ chuỗi trong request body
-app.use(deepTrimMiddleware);
+app.use(trimMiddleware);
 
 // Middleware logger
 app.use(morgan('dev'));

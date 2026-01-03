@@ -1,7 +1,7 @@
 const accountRepository = require("./account.repository");
 const formatFilter = require("../../utils/format-filter");
 const throwHttpError = require("../../utils/throw-http-error");
-const formatReturnDataPagination = require("../../utils/format-return-data-pagination");
+const formatOutputPagination = require("../../utils/format-output-pagination");
 
 module.exports = {
     getAccounts: async (data) => {
@@ -10,13 +10,12 @@ module.exports = {
             order: [["updated_at", "DESC"]]
         }
 
-        const page = Number(data.page || "1");
-        const limit = Number(data.limit || "20");
-        const filterWhitelist = ["username", "rank"];
-        const filter = formatFilter(data, filterWhitelist);
+        const page = data.page;
+        const limit = data.limit;
+        const filter = formatFilter(data, ["username", "rank"]);
 
         const { count, rows } = await accountRepository.findAccounts({ page, limit, filter, options });
-        return formatReturnDataPagination({ rows: { accounts: rows }, page, count, limit });
+        return formatOutputPagination({ rows: { accounts: rows }, page, count, limit });
     },
 
     updateAccountRole: async (data) => {

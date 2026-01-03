@@ -1,9 +1,10 @@
 const authService = require("./auth.service");
 const throwHttpError = require("../../utils/throw-http-error");
-const tokenTypesConst = require("../../consts/token-types.const");
+
+const TOKEN_TYPES = require("../../consts/token-types.const");
 
 module.exports = {
-    googleSignIn: async (req, res, next) => {
+    googleSignIn: async (req, res) => {
         try {
             const data = req.user;
             if (!data?.email || !data?.username) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
@@ -12,11 +13,11 @@ module.exports = {
             res.redirect(`${process.env.FE}/google-sign-in?token=${token}`);
         }
         catch(error) {
+            console.error(error);
+
             const params = new URLSearchParams();
             if (error?.message) params.set("message", error.message);
-
             res.redirect(`${process.env.FE}/google-sign-in/failed?${params.toString()}`);
-            next(error);
         }
     },
 
@@ -39,7 +40,8 @@ module.exports = {
     signUp: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.username || !data?.email || !data?.password || !data?.confirmPassword || !data?.provider) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+
+            if (!data?.username || !data?.email || !data?.password || !data?.confirmPassword) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
             if (data.password !== data.confirmPassword) throwHttpError(400, "Mật khẩu xác nhận không khớp!");
 
             await authService.signUp(data);
@@ -71,18 +73,15 @@ module.exports = {
     sendAuthEmail: async (req, res, next) => {
         try {
             const data = req.body;
+
             if (!data?.email || !data?.tokenType) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
-            if (!Object.values(tokenTypesConst).includes(data.tokenType)) throwHttpError(400, "Dữ liệu tokenType đã cung cấp không hợp lệ!");
+            if (!Object.values(TOKEN_TYPES).includes(data.tokenType)) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
 
             await authService.sendAuthEmail(data);
 
-            let message = "";
-            if (data?.tokenType === tokenTypesConst.VERIFY_EMAIL) message = "Vui lòng kiểm tra hộp thư để tiếp tục!";
-            else if (data?.tokenType === tokenTypesConst.RESET_PASSWORD) message = "Vui lòng kiểm tra hộp thư để tiếp tục!";
-
             return res.status(200).json({
                 success: true,
-                message
+                message: "Vui lòng kiểm tra hộp thư để tiếp tục!"
             });
         }
         catch (error) { next(error); }

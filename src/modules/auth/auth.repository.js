@@ -9,6 +9,8 @@ module.exports = {
     findByEmail: async ({ email, options = {} } = {}) => {
         return Account.findOne({
             where: { email },
+            raw: true,
+            nest: true,
             ...options
         });
     },
@@ -19,6 +21,8 @@ module.exports = {
                 token,
                 token_type: tokenType
             },
+            raw: true,
+            nest: true,
             ...options
         });
     },

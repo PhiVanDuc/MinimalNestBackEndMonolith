@@ -1,13 +1,11 @@
 const accountService = require("./account.service");
 const throwHttpError = require("../../utils/throw-http-error");
-const isPositiveIntegerString = require("../../utils/is-positive-integer-string");
+const formatInputPagination = require("../../utils/format-input-pagination");
 
 module.exports = {
     getAccounts: async (req, res, next) => {
         try {
-            const data = req.query;
-            if ((data.page && !isPositiveIntegerString(data.page)) || (data.limit && !isPositiveIntegerString(data.limit))) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
-
+            const data = { ...req.query, ...formatInputPagination(req.query.page, req.query.limit) };
             const result = await accountService.getAccounts(data);
 
             return res.status(200).json({

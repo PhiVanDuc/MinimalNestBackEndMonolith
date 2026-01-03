@@ -1,34 +1,35 @@
+const humps = require("humps");
 const colorRepository = require("./color.repository");
 const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
 const isUniqueError = require("../../utils/is-unique-error");
 const throwHttpError = require("../../utils/throw-http-error");
-const formatReturnDataPagination = require("../../utils/format-return-data-pagination");
+const formatOutputPagination = require("../../utils/format-output-pagination");
 
 module.exports = {
-    getColors: async (data, attributes) => {
+    getColors: async (data) => {
         const options = {
-            attributes: attributes,
+            attributes: ["id", "name", "slug", "color_code"],
             order: [["updated_at", "DESC"]]
         }
 
-        const page = Number(data.page || "1");
-        const limit = Number(data.limit || "20");
+        const page = data.page;
+        const limit = data.limit;
         const filterWhitelist = ["name"];
         const filter = formatFilter(data, filterWhitelist);
 
         const { count, rows } = await colorRepository.findColors({ page, limit, filter, options });
-        return formatReturnDataPagination({ rows: { colors: rows }, page, count, limit });
+        return formatOutputPagination({ rows: { colors: humps.camelizeKeys(rows) }, page, count, limit });
     },
 
     getColor: async (data) => {
         const color = await colorRepository.findById({
             id: data.id,
-            options: { attributes: ["id", "name", ["color_code", "colorCode"]] }
+            options: { attributes: ["id", "name", "slug", "color_code"] }
         });
 
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
-        return color;
+        return humps.camelizeKeys(color);
     },
 
     addColor: async (data) => {

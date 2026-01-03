@@ -1,5 +1,5 @@
 const transporter = require("../../configs/transporter.config");
-const emailTemplatesConst = require("../../consts/email-templates.const");
+const EMAIL_TEMPLATES = require("../../consts/email-templates.const");
 const verificationEmailTemplate = require("./verification-email-template");
 const resetPasswordEmailTemplate = require("./reset-password-email-template");
 
@@ -8,10 +8,10 @@ module.exports = async (emailTemplate, to, data) => {
         let content = { subject: "", html: "" };
 
         switch (emailTemplate) {
-            case emailTemplatesConst.VERIFICATION_EMAIL:
+            case EMAIL_TEMPLATES.VERIFICATION_EMAIL:
                 content = verificationEmailTemplate(data);
                 break;
-            case emailTemplatesConst.RESET_PASSWORD_EMAIL:
+            case EMAIL_TEMPLATES.RESET_PASSWORD_EMAIL:
                 content = resetPasswordEmailTemplate(data);
                 break;
             default:

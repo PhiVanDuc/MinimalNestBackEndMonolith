@@ -8,17 +8,25 @@ const createBaseRepository = (model) => {
             where: whereResult,
             offset: (page - 1) * limit,
             limit,
+            raw: true,
+            nest: true,
             ...options
         });
     };
 
     const findById = async ({ id, options = {} } = {}) => {
-        return model.findByPk(id, options);
+        return model.findByPk(id, {
+            raw: true,
+            nest: true,
+            ...options
+        });
     };
 
     const findBySlug = async ({ slug, options = {} } = {}) => {
         return model.findOne({
             where: { slug },
+            raw: true,
+            nest: true,
             ...options
         });
     };
