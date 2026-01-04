@@ -12,6 +12,7 @@ const generateRandomToken = require("../../utils/generate-random-token");
 const SALT_ROUNDS = 10;
 const AUTH_TOKEN_EXPIRES_IN = 15;
 const EXCHANGE_TOKEN_EXPIRES_IN = 1;
+const PROVIDERS = require("../../consts/providers");
 const TOKEN_TYPES = require("../../consts/token-types.const");
 const EMAIL_TEMPLATES = require("../../consts/email-templates.const");
 
@@ -41,7 +42,7 @@ module.exports = {
                 data: {
                     username: data.username,
                     email: data.email,
-                    provider: data.provider,
+                    provider: PROVIDERS.GOOGLE,
                     token: exchangeToken,
                     token_type: TOKEN_TYPES.EXCHANGE_GOOGLE,
                     token_expired_at: exchangeTokenExpiredAt,
@@ -109,7 +110,7 @@ module.exports = {
                     username: data.username,
                     email: data.email,
                     password: hashedPassword,
-                    provider: data.provider,
+                    provider: PROVIDERS.CREDENTIALS,
                     token: authToken,
                     token_type: TOKEN_TYPES.VERIFY_EMAIL,
                     token_expired_at: authTokenExpiredAt

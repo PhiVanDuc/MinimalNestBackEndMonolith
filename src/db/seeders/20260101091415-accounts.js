@@ -3,6 +3,10 @@
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require('uuid');
 
+const RANKS = require("../../consts/ranks");
+const ROLES = require("../../consts/roles");
+const PROVIDERS = require("../../consts/providers");
+
 module.exports = {
     async up (queryInterface, Sequelize) {
         const now = new Date();
@@ -16,9 +20,9 @@ module.exports = {
                     username: "Siêu quản trị viên",
                     email: "phid808@gmail.com",
                     password: hashedPassword,
-                    rank: "khach-vip",
-                    role: "sieu-quan-tri-vien",
-                    provider: "credentials",
+                    rank: RANKS.VIP_CUSTOMER,
+                    role: ROLES.SUPER_ADMIN,
+                    provider: PROVIDERS.CREDENTIALS,
                     is_verified: true,
                     created_at: now,
                     updated_at: now

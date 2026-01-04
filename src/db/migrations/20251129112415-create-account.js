@@ -1,5 +1,8 @@
 'use strict';
 
+const RANKS = require("../../consts/ranks");
+const ROLES = require("../../consts/roles");
+
 module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.createTable('accounts', {
@@ -25,12 +28,12 @@ module.exports = {
             rank: {
                 type: Sequelize.STRING,
                 allowNull: false,
-                defaultValue: "khach-moi"
+                defaultValue: RANKS.NEW_CUSTOMER
             },
             role: {
                 type: Sequelize.STRING,
                 allowNull: false,
-                defaultValue: "khach-hang"
+                defaultValue: ROLES.CUSTOMER
             },
             provider: {
                 type: Sequelize.STRING,

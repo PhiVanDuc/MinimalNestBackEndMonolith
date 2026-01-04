@@ -2,6 +2,9 @@
 
 const { Model } = require('sequelize');
 
+const RANKS = require("../../consts/ranks");
+const ROLES = require("../../consts/roles");
+
 module.exports = (sequelize, DataTypes) => {
     class Account extends Model {
         static associate(models) {
@@ -38,12 +41,12 @@ module.exports = (sequelize, DataTypes) => {
             rank: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                defaultValue: "khach-moi"
+                defaultValue: RANKS.NEW_CUSTOMER
             },
             role: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                defaultValue: "khach-hang"
+                defaultValue: ROLES.CUSTOMER
             },
             provider: {
                 type: DataTypes.STRING,
