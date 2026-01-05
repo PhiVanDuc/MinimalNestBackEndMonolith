@@ -16,7 +16,9 @@ module.exports = {
                 references: {
                     model: "products_colors",
                     key: "id"
-                }
+                },
+                onUpdate: "CASCADE",
+                onDelete: "CASCADE"
             },
             public_id: {
                 type: Sequelize.STRING,

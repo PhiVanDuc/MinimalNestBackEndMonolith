@@ -2,9 +2,10 @@ const humps = require("humps");
 const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
 const categoryRepository = require("./category.repository");
-const isUniqueError = require("../../utils/is-unique-error");
 const throwHttpError = require("../../utils/throw-http-error");
 const formatOutputPagination = require("../../utils/format-output-pagination");
+
+const SEQUELIZE_ERRORS = require("../../consts/sequelize-errors");
 
 module.exports = {
     getCategories: async (data) => {
@@ -42,7 +43,7 @@ module.exports = {
             });
         }
         catch (error) {
-            if (isUniqueError(error)) throwHttpError(409, "Tên danh mục đã được sử dụng!");
+            if (error.name === SEQUELIZE_ERRORS.UNIQUE) throwHttpError(409, "Tên danh mục đã được sử dụng!");
             throw error;
         }
     },
@@ -65,7 +66,7 @@ module.exports = {
             });
         }
         catch (error) {
-            if (isUniqueError(error)) throwHttpError(409, "Tên danh mục đã được sử dụng!");
+            if (error.name === SEQUELIZE_ERRORS.UNIQUE) throwHttpError(409, "Tên danh mục đã được sử dụng!");
             throw error;
         }
     },

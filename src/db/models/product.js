@@ -67,7 +67,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             discount: {
                 type: DataTypes.INTEGER,
-                defaultValue: 0
+                allowNull: false
             },
             price: {
                 type: DataTypes.INTEGER,

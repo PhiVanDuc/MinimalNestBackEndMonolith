@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const http = require("http");
 const morgan = require('morgan');
 const cors = require('cors');
 const corsConfig = require('./src/configs/cors.config');
@@ -14,6 +15,7 @@ const indexRoute = require("./src/routes/index.route");
 const apiRoute = require("./src/routes/api.route");
 
 const app = express();
+const server = http.createServer(app);
 
 // Middleware cors
 app.use(cors(corsConfig));
@@ -37,4 +39,4 @@ app.use("/api", apiRoute);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-app.listen(process.env.PORT, () => console.log(`Server đang chạy trên port ${process.env.PORT}`));
+server.listen(process.env.PORT, () => console.log(`Server đang chạy trên port ${process.env.PORT}`));

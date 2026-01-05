@@ -18,7 +18,7 @@ module.exports = {
                     key: "id"
                 },
                 onUpdate: "CASCADE",
-                onDELETE: "CASCADE"
+                onDelete: "CASCADE"
             },
             color_id: {
                 type: Sequelize.UUID,
@@ -28,7 +28,7 @@ module.exports = {
                     key: "id"
                 },
                 onUpdate: "CASCADE",
-                onDELETE: "CASCADE"
+                onDelete: "CASCADE"
             },
             created_at: {
                 allowNull: false,

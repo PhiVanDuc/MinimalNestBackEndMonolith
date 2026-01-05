@@ -1,1 +1,0 @@
-module.exports = (err) => err.name === "SequelizeUniqueConstraintError";

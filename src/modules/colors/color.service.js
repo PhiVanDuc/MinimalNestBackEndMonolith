@@ -2,9 +2,10 @@ const humps = require("humps");
 const colorRepository = require("./color.repository");
 const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
-const isUniqueError = require("../../utils/is-unique-error");
 const throwHttpError = require("../../utils/throw-http-error");
 const formatOutputPagination = require("../../utils/format-output-pagination");
+
+const SEQUELIZE_ERRORS = require("../../consts/sequelize-errors");
 
 module.exports = {
     getColors: async (data) => {
@@ -43,7 +44,7 @@ module.exports = {
             });
         }
         catch (error) {
-            if (isUniqueError(error)) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
+            if (error.name === SEQUELIZE_ERRORS.UNIQUE) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
             throw error;
         }
     },
@@ -67,7 +68,7 @@ module.exports = {
             });
         }
         catch (error) {
-            if (isUniqueError(error)) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
+            if (error.name === SEQUELIZE_ERRORS.UNIQUE) throwHttpError(409, "Tên màu sắc đã được sử dụng!");
             throw error;
         }
     },

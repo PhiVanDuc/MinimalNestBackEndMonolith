@@ -37,7 +37,7 @@ module.exports = {
             },
             discount: {
                 type: Sequelize.INTEGER,
-                defaultValue: 0
+                allowNull: false
             },
             price: {
                 type: Sequelize.INTEGER,
