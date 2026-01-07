@@ -10,7 +10,7 @@ module.exports = {
                 unique: true,
                 defaultValue: Sequelize.UUIDV4
             },
-            products_colors_id: {
+            product_color_id: {
                 type: Sequelize.UUID,
                 allowNull: false,
                 references: {

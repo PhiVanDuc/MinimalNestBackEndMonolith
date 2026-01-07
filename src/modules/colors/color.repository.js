@@ -1,5 +1,5 @@
-const { Color } = require("../../db/models/index");
 const { Op } = require("sequelize");
+const { Color } = require("../../db/models/index");
 
 const createBaseRepository = require("../base/base.repository");
 const baseRepository = createBaseRepository(Color);
@@ -7,7 +7,7 @@ const baseRepository = createBaseRepository(Color);
 module.exports = {
     ...baseRepository,
 
-    findColors: async ({ page, limit, filter, options = {} } = {}) => {
+    paginateColors: async ({ page, limit, filter, options = {} } = {}) => {
         const whereConfig = {
             name: (value) => {
                 return {
@@ -16,6 +16,6 @@ module.exports = {
             }
         }
 
-        return baseRepository.findAll({ page, limit, filter, whereConfig, options });
+        return baseRepository.findAndCountAll({ page, limit, filter, whereConfig, options });
     }
 }

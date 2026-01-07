@@ -1,32 +1,28 @@
 const generateWhere = require("../../utils/generate-where");
 
 const createBaseRepository = (model) => {
-    const findAll = async ({ page, limit, filter, whereConfig, options = {} } = {}) => {
+    const findAndCountAll = async ({ page, limit, filter, whereConfig, options = {} } = {}) => {
         const whereResult = generateWhere(filter, whereConfig);
 
         return model.findAndCountAll({
             where: whereResult,
             offset: (page - 1) * limit,
             limit,
-            raw: true,
-            nest: true,
             ...options
         });
     };
 
+    const findAll = async (options = {}) => {
+        return model.findAll(options);
+    }
+
     const findById = async ({ id, options = {} } = {}) => {
-        return model.findByPk(id, {
-            raw: true,
-            nest: true,
-            ...options
-        });
+        return model.findByPk(id, options);
     };
 
     const findBySlug = async ({ slug, options = {} } = {}) => {
         return model.findOne({
             where: { slug },
-            raw: true,
-            nest: true,
             ...options
         });
     };
@@ -50,6 +46,7 @@ const createBaseRepository = (model) => {
     };
 
     return {
+        findAndCountAll,
         findAll,
         findById,
         findBySlug,

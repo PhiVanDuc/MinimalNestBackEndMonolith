@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
             });
 
             ProductColor.hasMany(models.ProductImage, {
-                foreignKey: "products_colors_id",
+                foreignKey: "product_color_id",
                 as: "product_images"
             });
         }

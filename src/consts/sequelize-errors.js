@@ -1,3 +1,4 @@
 module.exports = {
-    UNIQUE: "SequelizeUniqueConstraintError"
+    UNIQUE: "SequelizeUniqueConstraintError",
+    FOREIGN_KEY: "SequelizeForeignKeyConstraintError"
 }

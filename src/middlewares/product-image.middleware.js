@@ -5,7 +5,7 @@ const fs = require("fs");
 const throwHttpError = require("../../src/utils/throw-http-error");
 
 const UPLOAD_DIRECTORY = path.join(__dirname, "..", "..", "public", "uploads", "product-images");
-const LIMIT_FILE_SIZE = 2 * 1024 * 1024;
+const LIMIT_FILE_SIZE = 1 * 1024 * 1024;
 const LIMIT_FILE_NUMBER = 10;
 
 if (!fs.existsSync(UPLOAD_DIRECTORY)) {
@@ -54,12 +54,16 @@ module.exports = (req, res, next) => {
                 let message = "Lỗi xử lý ảnh!";
                 if (error.code === "LIMIT_FILE_SIZE") message = `Vui lòng cung cấp ảnh có kích cỡ tối đa 2MB!`;
                 if (error.code === "LIMIT_FILE_COUNT") message = `Vui lòng cung cấp tối đa ${LIMIT_FILE_NUMBER} ảnh!`;
+                if (error.code === "LIMIT_UNEXPECTED_FILE") message = `Vui lòng đổi tên trường dữ liệu sang images!`;
 
                 throwHttpError(400, message);
             }
             else if (error) throwHttpError(400, error.message);
         }
-        catch(err) { return next(err); }
+        catch(err) {
+            console.error(error);
+            return next(err);
+        }
 
         next();
     });

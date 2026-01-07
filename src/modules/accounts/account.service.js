@@ -14,7 +14,7 @@ module.exports = {
         const limit = data.limit;
         const filter = formatFilter(data, ["username", "rank"]);
 
-        const { count, rows } = await accountRepository.findAccounts({ page, limit, filter, options });
+        const { count, rows } = await accountRepository.paginateAccounts({ page, limit, filter, options });
         return formatOutputPagination({ rows: { accounts: rows }, page, count, limit });
     },
 

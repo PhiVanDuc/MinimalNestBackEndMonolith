@@ -7,7 +7,7 @@ const baseRepository = createBaseRepository(Account);
 module.exports = {
     ...baseRepository,
 
-    findAccounts: async ({ page, limit, filter, options = {} } = {}) => {
+    paginateAccounts: async ({ page, limit, filter, options = {} } = {}) => {
         const whereConfig = {
             username: (value) => {
                 return {
@@ -21,6 +21,6 @@ module.exports = {
             }
         }
 
-        return baseRepository.findAll({ page, limit, filter, whereConfig, options });
+        return baseRepository.findAndCountAll({ page, limit, filter, whereConfig, options });
     }
 }

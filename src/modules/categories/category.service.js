@@ -1,4 +1,3 @@
-const humps = require("humps");
 const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
 const categoryRepository = require("./category.repository");
@@ -19,8 +18,8 @@ module.exports = {
         const filterWhitelist = ["name"];
         const filter = formatFilter(data, filterWhitelist);
 
-        const { count, rows } = await categoryRepository.findCategories({ page, limit, filter, options });
-        return formatOutputPagination({ rows: { categories: humps.camelizeKeys(rows) }, page, count, limit });
+        const { count, rows } = await categoryRepository.paginateCategories({ page, limit, filter, options });
+        return formatOutputPagination({ rows: { categories: rows }, page, count, limit });
     },
 
     getCategory: async (data) => {
@@ -30,7 +29,7 @@ module.exports = {
         });
 
         if (!category) throwHttpError(404, "Không tìm thấy danh mục!");
-        return humps.camelizeKeys(category);
+        return category;
     },
 
     addCategory: async (data) => {

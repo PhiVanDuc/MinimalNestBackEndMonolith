@@ -19,8 +19,10 @@ module.exports = {
         const filterWhitelist = ["name"];
         const filter = formatFilter(data, filterWhitelist);
 
-        const { count, rows } = await colorRepository.findColors({ page, limit, filter, options });
-        return formatOutputPagination({ rows: { colors: humps.camelizeKeys(rows) }, page, count, limit });
+        const { count, rows } = await colorRepository.paginateColors({ page, limit, filter, options });
+        const plainColors = rows.map(row => row.get({ plain: true }));
+
+        return formatOutputPagination({ rows: { colors: humps.camelizeKeys(plainColors) }, page, count, limit });
     },
 
     getColor: async (data) => {
@@ -30,7 +32,7 @@ module.exports = {
         });
 
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
-        return humps.camelizeKeys(color);
+        return humps.camelizeKeys(color.get({ plain: true }));
     },
 
     addColor: async (data) => {

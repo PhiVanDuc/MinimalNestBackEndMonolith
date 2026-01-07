@@ -8,34 +8,38 @@ module.exports = {
     addProduct: async (req, res, next) => {
         try {
             const data = req.body;
-            const { name, desc, costPrice, interestPercent, discountType, discount, price, categories, colors } = data;
-            const numberFields = [costPrice, interestPercent, discount, price];
+            const { name, desc, costPrice, interestPercent, discountType, discount, categories, colors } = data;
+            const numberFields = [costPrice, interestPercent, discount];
 
-            console.log(data);
+            if (!name || !desc || !costPrice || !interestPercent || !discountType || discount === undefined || discount === null || !categories || !colors) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            if (!name || !desc || !costPrice || !interestPercent || !discountType || !price || !categories || !colors) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
             if (!numberFields.every(numberField => typeof numberField === "number" && Number.isInteger(numberField) && numberField >= 0)) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
+            
             if (!Object.values(DISCOUNT_TYPES).includes(discountType)) throwHttpError(400, "Dữ liệu đã cung cấp không hợp lệ!");
 
-            await productService.addProduct(data);
+            const result = await productService.addProduct(data);
 
             return res.status(201).json({
                 success: true,
-                message: "Thêm sản phẩm thành công!"
+                message: "Thêm sản phẩm thành công!",
+                data: result
             });
         }
         catch(error) { next(error); }
     },
 
     addProductImages: async (req, res, next) => {
-        const files = req.files;
-        const data = req.body;
+        const data = {
+            files: req.files,
+            productId: req.params.id,
+            ...req.body
+        }
 
         try {
-            console.log("Các ảnh", files);
-            console.log("Các dữ liệu: ", data);
+            if (!data.productId) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            await Promise.all(files.map(file => deleteDiskStorageImage(file.path)));
+            await productService.addProductImages(data);
+            await Promise.all(data.files.map(file => deleteDiskStorageImage(file.path)));
 
             return res.status(201).json({
                 success: true,
@@ -43,7 +47,7 @@ module.exports = {
             });
         }
         catch (error) {
-            await Promise.all(files.map(file => deleteDiskStorageImage(file.path)));
+            await Promise.all(data.files.map(file => deleteDiskStorageImage(file.path)));
             next(error);
         }
     }

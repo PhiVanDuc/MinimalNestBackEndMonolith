@@ -21,7 +21,7 @@ module.exports = {
         const exchangeToken = generateRandomToken();
         const exchangeTokenExpiredAt = moment().add(EXCHANGE_TOKEN_EXPIRES_IN, 'minutes').toDate();
 
-        const account = await authRepository.findByEmail({ email: data.email });
+        const account = await authRepository.findAccountByEmail({ email: data.email });
 
         if (account) {
             if (account.provider !== "google") throwHttpError(409, "Email này đã được đăng ký theo hình thức email và mật khẩu!");
@@ -55,7 +55,7 @@ module.exports = {
     },
 
     googleExchange: async (data) => {
-        const account = await authRepository.findByToken({
+        const account = await authRepository.findAccountByToken({
             token: data.token,
             tokenType: TOKEN_TYPES.EXCHANGE_GOOGLE,
             options: { attributes: ["id", "username", "email", "rank", "role", "provider", "token_expired_at"] }
@@ -94,7 +94,7 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const account = await authRepository.findByEmail({
+            const account = await authRepository.findAccountByEmail({
                 email: data.email,
                 options: { attributes: ["id"] }
             });
@@ -136,7 +136,7 @@ module.exports = {
     },
 
     signIn: async (data) => {
-        const account = await authRepository.findByEmail({
+        const account = await authRepository.findAccountByEmail({
             email: data.email,
             options: { attributes: ["id", "username", "email", "password", "rank", "role", "provider", "is_verified"] }
         });
@@ -165,7 +165,7 @@ module.exports = {
         const transaction = await sequelize.transaction();
 
         try {
-            const account = await authRepository.findByEmail({
+            const account = await authRepository.findAccountByEmail({
                 email: data.email,
                 options: { attributes: ["id", "username", "provider", "is_verified"] }
             });
@@ -216,7 +216,7 @@ module.exports = {
     },
 
     verifyEmail: async (data) => {
-        const account = await authRepository.findByToken({
+        const account = await authRepository.findAccountByToken({
             token: data.token,
             tokenType: TOKEN_TYPES.VERIFY_EMAIL,
             options: { attributes: ["id", "token_expired_at"] }
@@ -252,7 +252,7 @@ module.exports = {
     },
 
     resetPassword: async (data) => {
-        const account = await authRepository.findByToken({
+        const account = await authRepository.findAccountByToken({
             token: data.token,
             tokenType: TOKEN_TYPES.RESET_PASSWORD,
             options: { attributes: ["id", "token_expired_at"] }
