@@ -36,7 +36,7 @@ module.exports = {
     addColor: async (req, res, next) => {
         try {
             const data = req.body;
-            if (!data?.name || !data.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!data?.name || !data?.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
             await colorService.addColor(data);
 
@@ -51,7 +51,7 @@ module.exports = {
     updateColor: async (req, res, next) => {
         try {
             const data = { ...req.params, ...req.body }
-            if (!data?.id || !data?.name || !data.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
+            if (!data?.id || !data?.name || !data?.colorCode) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
             await colorService.updateColor(data);
 

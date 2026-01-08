@@ -1,4 +1,3 @@
-const humps = require("humps");
 const colorRepository = require("./color.repository");
 const formatFilter = require("../../utils/format-filter");
 const generateSlug = require("../../utils/generate-slug");
@@ -11,7 +10,7 @@ module.exports = {
     getColors: async (data) => {
         const options = {
             attributes: ["id", "name", "slug", "colorCode"],
-            order: [["updated_at", "DESC"]]
+            order: [["updatedAt", "DESC"]]
         }
 
         const page = data.page;
@@ -20,9 +19,7 @@ module.exports = {
         const filter = formatFilter(data, filterWhitelist);
 
         const { count, rows } = await colorRepository.paginateColors({ page, limit, filter, options });
-        const plainColors = rows.map(row => row.get({ plain: true }));
-
-        return formatOutputPagination({ rows: { colors: humps.camelizeKeys(plainColors) }, page, count, limit });
+        return formatOutputPagination({ rows: { colors: rows }, page, count, limit });
     },
 
     getColor: async (data) => {
@@ -32,7 +29,7 @@ module.exports = {
         });
 
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
-        return humps.camelizeKeys(color.get({ plain: true }));
+        return color;
     },
 
     addColor: async (data) => {

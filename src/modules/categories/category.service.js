@@ -10,7 +10,7 @@ module.exports = {
     getCategories: async (data) => {
         const options = {
             attributes: ["id", "name", "slug"],
-            order: [["updated_at", "DESC"]]
+            order: [["updatedAt", "DESC"]]
         }
 
         const page = data.page;

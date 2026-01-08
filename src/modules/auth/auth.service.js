@@ -4,17 +4,17 @@ const { sequelize } = require("../../db/models/index");
 const bcrypt = require("bcrypt");
 const moment = require("moment");
 
+const PROVIDERS = require("../../consts/providers");
 const sendEmail = require("../../libs/email/sendEmail");
+const TOKEN_TYPES = require("../../consts/token-types.const");
 const throwHttpError = require("../../utils/throw-http-error");
 const { signJWTToken, verifyJWTToken } = require("../../libs/jwt");
+const EMAIL_TEMPLATES = require("../../consts/email-templates.const");
 const generateRandomToken = require("../../utils/generate-random-token");
 
 const SALT_ROUNDS = 10;
 const AUTH_TOKEN_EXPIRES_IN = 15;
 const EXCHANGE_TOKEN_EXPIRES_IN = 1;
-const PROVIDERS = require("../../consts/providers");
-const TOKEN_TYPES = require("../../consts/token-types.const");
-const EMAIL_TEMPLATES = require("../../consts/email-templates.const");
 
 module.exports = {
     googleSignIn: async (data) => {
@@ -171,7 +171,7 @@ module.exports = {
             });
 
             if (!account) throwHttpError(404, "Email chưa được đăng ký!");
-            if (account.provider === "google") throwHttpError(409, "Email này được đăng ký theo hình thức google!");
+            if (account.provider === PROVIDERS.GOOGLE) throwHttpError(409, "Email này được đăng ký theo hình thức google!");
 
             switch (data.tokenType) {
                 case TOKEN_TYPES.VERIFY_EMAIL:

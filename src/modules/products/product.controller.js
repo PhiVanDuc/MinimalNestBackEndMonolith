@@ -38,12 +38,13 @@ module.exports = {
         try {
             if (!data.productId) throwHttpError(400, "Vui lòng cung cấp đủ dữ liệu!");
 
-            await productService.addProductImages(data);
+            const result = await productService.addProductImages(data);
             await Promise.all(data.files.map(file => deleteDiskStorageImage(file.path)));
 
-            return res.status(201).json({
+            return res.status(result.statusCode).json({
                 success: true,
-                message: "Thêm ảnh sản phẩm thành công!"
+                message: result.message,
+                ...(result?.data ? { data: result.data } : {})
             });
         }
         catch (error) {

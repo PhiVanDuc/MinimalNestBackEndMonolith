@@ -15,10 +15,7 @@ module.exports = {
 
     findAccountByToken: async ({ token, tokenType, options = {} } = {}) => {
         return Account.findOne({
-            where: {
-                token,
-                tokenType: tokenType
-            },
+            where: { token, tokenType },
             ...options
         });
     },

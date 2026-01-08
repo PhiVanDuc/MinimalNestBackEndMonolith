@@ -5,8 +5,6 @@ const formatInputPagination = require("../../utils/format-input-pagination");
 module.exports = {
     getCategories: async (req, res, next) => {
         try {
-            console.log(req.query);
-
             const data = { ...req.query, ...formatInputPagination(req.query.page, req.query.limit) };
             const result = await categoryService.getCategories(data);
 

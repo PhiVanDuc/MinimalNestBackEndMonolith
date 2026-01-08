@@ -6,7 +6,7 @@ const baseRepository = createBaseRepository(ProductImage);
 module.exports = {
     ...baseRepository,
     
-    createProductImages: async ({ data, options = {} } = {}) => {
+    addProductImages: async ({ data, options = {} } = {}) => {
         return ProductImage.bulkCreate(data, options);
     }
 }

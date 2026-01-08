@@ -7,7 +7,7 @@ module.exports = {
     getAccounts: async (data) => {
         const options = {
             attributes: ["id", "username", "email", "rank", "role", "provider"],
-            order: [["updated_at", "DESC"]]
+            order: [["updatedAt", "DESC"]]
         }
 
         const page = data.page;
