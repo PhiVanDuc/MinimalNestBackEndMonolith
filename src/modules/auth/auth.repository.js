@@ -17,7 +17,7 @@ module.exports = {
         return Account.findOne({
             where: {
                 token,
-                token_type: tokenType
+                tokenType: tokenType
             },
             ...options
         });

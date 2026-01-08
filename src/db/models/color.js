@@ -6,14 +6,14 @@ module.exports = (sequelize, DataTypes) => {
     class Color extends Model {
         static associate(models) {
             Color.hasMany(models.ProductColor, {
-                foreignKey: "color_id",
-                as: "colors_products"
+                foreignKey: "colorId",
+                as: "colorsProducts"
             });
 
             Color.belongsToMany(models.Product, {
                 through: models.ProductColor,
-                foreignKey: "color_id",
-                otherKey: "product_id",
+                foreignKey: "colorId",
+                otherKey: "productId",
                 as: "products"
             });
         }
@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 unique: true
             },
-            color_code: {
+            colorCode: {
                 type: DataTypes.STRING,
                 allowNull: false
             }
@@ -46,9 +46,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'Color',
             tableName: 'colors',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
 

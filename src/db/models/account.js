@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     class Account extends Model {
         static associate(models) {
             Account.hasMany(models.Address, {
-                foreignKey: 'account_id',
+                foreignKey: 'accountId',
                 as: 'addresses',
                 onUpdate: "CASCADE",
                 onDelete: "CASCADE"
@@ -55,13 +55,13 @@ module.exports = (sequelize, DataTypes) => {
             token: {
                 type: DataTypes.STRING
             },
-            token_type: {
+            tokenType: {
                 type: DataTypes.STRING
             },
-            token_expired_at: {
+            tokenExpiredAt: {
                 type: DataTypes.DATE
             },
-            is_verified: {
+            isVerified: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
@@ -71,9 +71,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'Account',
             tableName: 'accounts',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
 

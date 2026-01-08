@@ -6,26 +6,26 @@ module.exports = (sequelize, DataTypes) => {
     class Product extends Model {
         static associate(models) {
             Product.hasMany(models.ProductCategory, {
-                foreignKey: "product_id",
-                as: "products_categories"
+                foreignKey: "productId",
+                as: "productsCategories"
             });
 
             Product.belongsToMany(models.Category, {
                 through: models.ProductCategory,
-                foreignKey: "product_id",
-                otherKey: "category_id",
+                foreignKey: "productId",
+                otherKey: "categoryId",
                 as: "categories"
             });
 
             Product.hasMany(models.ProductColor, {
-                foreignKey: "product_id",
-                as: "products_colors"
+                foreignKey: "productId",
+                as: "productsColors"
             });
 
             Product.belongsToMany(models.Color, {
                 through: models.ProductColor,
-                foreignKey: "product_id",
-                otherKey: "color_id",
+                foreignKey: "productId",
+                otherKey: "colorId",
                 as: "colors"
             });
         }
@@ -53,15 +53,15 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.TEXT,
                 allowNull: false
             },
-            cost_price: {
+            costPrice: {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
-            interest_percent: {
+            interestPercent: {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
-            discount_type: {
+            discountType: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
@@ -78,9 +78,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'Product',
             tableName: 'products',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
     

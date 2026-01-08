@@ -10,7 +10,7 @@ const SEQUELIZE_ERRORS = require("../../consts/sequelize-errors");
 module.exports = {
     getColors: async (data) => {
         const options = {
-            attributes: ["id", "name", "slug", "color_code"],
+            attributes: ["id", "name", "slug", "colorCode"],
             order: [["updated_at", "DESC"]]
         }
 
@@ -28,7 +28,7 @@ module.exports = {
     getColor: async (data) => {
         const color = await colorRepository.findById({
             id: data.id,
-            options: { attributes: ["id", "name", "slug", "color_code"] }
+            options: { attributes: ["id", "name", "slug", "colorCode"] }
         });
 
         if (!color) throwHttpError(404, "Không tìm thấy màu sắc!");
@@ -41,7 +41,7 @@ module.exports = {
                 data: {
                     slug: generateSlug(data.name),
                     name: data.name,
-                    color_code: data.colorCode
+                    colorCode: data.colorCode
                 }
             });
         }
@@ -65,7 +65,7 @@ module.exports = {
                 data: {
                     slug: generateSlug(data.name),
                     name: data.name,
-                    color_code: data.colorCode
+                    colorCode: data.colorCode
                 }
             });
         }

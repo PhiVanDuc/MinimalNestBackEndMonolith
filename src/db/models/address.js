@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     class Address extends Model {
         static associate(models) {
             Address.belongsTo(models.Account, {
-                foreignKey: 'account_id',
+                foreignKey: 'accountId',
                 as: 'account'
             });
         }
@@ -21,39 +21,39 @@ module.exports = (sequelize, DataTypes) => {
                 unique: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            account_id: {
+            accountId: {
                 type: DataTypes.UUID,
                 allowNull: false
             },
-            recipient_name: {
+            recipientName: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            phone_number: {
+            phoneNumber: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            province_id: {
+            provinceId: {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
-            province_name: {
+            provinceName: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            district_id: {
+            districtId: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            district_name: {
+            districtName: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            ward_code: {
+            wardCode: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            ward_name: {
+            wardName: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
@@ -66,9 +66,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'Address',
             tableName: 'addresses',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
 

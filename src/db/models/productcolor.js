@@ -6,18 +6,18 @@ module.exports = (sequelize, DataTypes) => {
     class ProductColor extends Model {
         static associate(models) {
             ProductColor.belongsTo(models.Product, {
-                foreignKey: "product_id",
+                foreignKey: "productId",
                 as: "product"
             });
 
             ProductColor.belongsTo(models.Color, {
-                foreignKey: "color_id",
+                foreignKey: "colorId",
                 as: "color"
             });
 
             ProductColor.hasMany(models.ProductImage, {
-                foreignKey: "product_color_id",
-                as: "product_images"
+                foreignKey: "productColorId",
+                as: "productImages"
             });
         }
     }
@@ -31,11 +31,11 @@ module.exports = (sequelize, DataTypes) => {
                 unique: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            product_id: {
+            productId: {
                 type: DataTypes.UUID,
                 allowNull: false
             },
-            color_id: {
+            colorId: {
                 type: DataTypes.UUID,
                 allowNull: false
             }
@@ -44,9 +44,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'ProductColor',
             tableName: 'products_colors',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
     

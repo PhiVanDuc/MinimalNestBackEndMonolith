@@ -6,14 +6,14 @@ module.exports = (sequelize, DataTypes) => {
     class Category extends Model {
         static associate(models) {
             Category.hasMany(models.ProductCategory, {
-                foreignKey: "category_id",
-                as: "categories_products"
+                foreignKey: "categoryId",
+                as: "categoriesProducts"
             });
 
             Category.belongsToMany(models.Product, {
                 through: models.ProductCategory,
-                foreignKey: "category_id",
-                otherKey: "product_id",
+                foreignKey: "categoryId",
+                otherKey: "productId",
                 as: "products"
             });
         }
@@ -42,9 +42,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'Category',
             tableName: 'categories',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
 

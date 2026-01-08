@@ -30,8 +30,8 @@ module.exports = {
                 id: account.id,
                 data: {
                     token: exchangeToken,
-                    token_type: TOKEN_TYPES.EXCHANGE_GOOGLE,
-                    token_expired_at: exchangeTokenExpiredAt
+                    tokenType: TOKEN_TYPES.EXCHANGE_GOOGLE,
+                    tokenExpiredAt: exchangeTokenExpiredAt
                 }
             });
 
@@ -44,9 +44,9 @@ module.exports = {
                     email: data.email,
                     provider: PROVIDERS.GOOGLE,
                     token: exchangeToken,
-                    token_type: TOKEN_TYPES.EXCHANGE_GOOGLE,
-                    token_expired_at: exchangeTokenExpiredAt,
-                    is_verified: true
+                    tokenType: TOKEN_TYPES.EXCHANGE_GOOGLE,
+                    tokenExpiredAt: exchangeTokenExpiredAt,
+                    isVerified: true
                 }
             });
 
@@ -58,20 +58,20 @@ module.exports = {
         const account = await authRepository.findAccountByToken({
             token: data.token,
             tokenType: TOKEN_TYPES.EXCHANGE_GOOGLE,
-            options: { attributes: ["id", "username", "email", "rank", "role", "provider", "token_expired_at"] }
+            options: { attributes: ["id", "username", "email", "rank", "role", "provider", "tokenExpiredAt"] }
         });
 
         if (!account) throwHttpError(400, "Liên kết trao đổi google không hợp lệ!");
 
-        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+        const tokenExpiredAtUTC = moment(account.tokenExpiredAt).utc();
         const nowUTC = moment().utc();
 
         await authRepository.update({
             id: account.id,
             data: {
                 token: null,
-                token_type: null,
-                token_expired_at: null
+                tokenType: null,
+                tokenExpiredAt: null
             }
         });
 
@@ -112,8 +112,8 @@ module.exports = {
                     password: hashedPassword,
                     provider: PROVIDERS.CREDENTIALS,
                     token: authToken,
-                    token_type: TOKEN_TYPES.VERIFY_EMAIL,
-                    token_expired_at: authTokenExpiredAt
+                    tokenType: TOKEN_TYPES.VERIFY_EMAIL,
+                    tokenExpiredAt: authTokenExpiredAt
                 },
                 options: { transaction }
             });
@@ -138,11 +138,11 @@ module.exports = {
     signIn: async (data) => {
         const account = await authRepository.findAccountByEmail({
             email: data.email,
-            options: { attributes: ["id", "username", "email", "password", "rank", "role", "provider", "is_verified"] }
+            options: { attributes: ["id", "username", "email", "password", "rank", "role", "provider", "isVerified"] }
         });
 
         if (!account) throwHttpError(401, "Email hoặc mật khẩu không đúng!");
-        if (!account.is_verified) throwHttpError(401, "Email chưa được xác minh!");
+        if (!account.isVerified) throwHttpError(401, "Email chưa được xác minh!");
         if (account && account.provider === "google") throwHttpError(409, "Email này được đăng ký theo hình thức google!");
 
         const isPasswordValid = await bcrypt.compare(data.password, account.password);
@@ -167,7 +167,7 @@ module.exports = {
         try {
             const account = await authRepository.findAccountByEmail({
                 email: data.email,
-                options: { attributes: ["id", "username", "provider", "is_verified"] }
+                options: { attributes: ["id", "username", "provider", "isVerified"] }
             });
 
             if (!account) throwHttpError(404, "Email chưa được đăng ký!");
@@ -175,10 +175,10 @@ module.exports = {
 
             switch (data.tokenType) {
                 case TOKEN_TYPES.VERIFY_EMAIL:
-                    if (account.is_verified) throwHttpError(409, "Email đã được xác minh!");
+                    if (account.isVerified) throwHttpError(409, "Email đã được xác minh!");
                     break;
                 case TOKEN_TYPES.RESET_PASSWORD:
-                    if (!account.is_verified) throwHttpError(409, "Email chưa được xác minh!");
+                    if (!account.isVerified) throwHttpError(409, "Email chưa được xác minh!");
                     break;
             }
 
@@ -192,8 +192,8 @@ module.exports = {
                 id: account.id,
                 data: {
                     token: authToken,
-                    token_type: data.tokenType,
-                    token_expired_at: authTokenExpiredAt
+                    tokenType: data.tokenType,
+                    tokenExpiredAt: authTokenExpiredAt
                 },
                 options: { transaction }
             });
@@ -219,12 +219,12 @@ module.exports = {
         const account = await authRepository.findAccountByToken({
             token: data.token,
             tokenType: TOKEN_TYPES.VERIFY_EMAIL,
-            options: { attributes: ["id", "token_expired_at"] }
+            options: { attributes: ["id", "tokenExpiredAt"] }
         });
 
         if (!account) throwHttpError(400, "Liên kết xác minh email không hợp lệ!");
 
-        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+        const tokenExpiredAtUTC = moment(account.tokenExpiredAt).utc();
         const nowUTC = moment().utc();
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) {
@@ -232,8 +232,8 @@ module.exports = {
                 id: account.id,
                 data: {
                     token: null,
-                    token_type: null,
-                    token_expired_at: null
+                    tokenType: null,
+                    tokenExpiredAt: null
                 }
             });
 
@@ -244,9 +244,9 @@ module.exports = {
             id: account.id,
             data: {
                 token: null,
-                token_type: null,
-                token_expired_at: null,
-                is_verified: true
+                tokenType: null,
+                tokenExpiredAt: null,
+                isVerified: true
             }
         });
     },
@@ -255,12 +255,12 @@ module.exports = {
         const account = await authRepository.findAccountByToken({
             token: data.token,
             tokenType: TOKEN_TYPES.RESET_PASSWORD,
-            options: { attributes: ["id", "token_expired_at"] }
+            options: { attributes: ["id", "tokenExpiredAt"] }
         });
 
         if (!account) throwHttpError(400, "Liên kết đặt lại mật khẩu không hợp lệ!");
 
-        const tokenExpiredAtUTC = moment(account.token_expired_at).utc();
+        const tokenExpiredAtUTC = moment(account.tokenExpiredAt).utc();
         const nowUTC = moment().utc();
 
         if (nowUTC.isAfter(tokenExpiredAtUTC)) {
@@ -268,8 +268,8 @@ module.exports = {
                 id: account.id,
                 data: {
                     token: null,
-                    token_type: null,
-                    token_expired_at: null
+                    tokenType: null,
+                    tokenExpiredAt: null
                 }
             });
 
@@ -282,8 +282,8 @@ module.exports = {
             id: account.id,
             data: {
                 token: null,
-                token_type: null,
-                token_expired_at: null,
+                tokenType: null,
+                tokenExpiredAt: null,
                 password: hashedPassword
             }
         });

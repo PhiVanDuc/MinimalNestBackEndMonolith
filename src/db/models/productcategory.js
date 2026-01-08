@@ -6,12 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     class ProductCategory extends Model {
         static associate(models) {
             ProductCategory.belongsTo(models.Product, {
-                foreignKey: "product_id",
+                foreignKey: "productId",
                 as: "product"
             });
 
             ProductCategory.belongsTo(models.Category, {
-                foreignKey: "category_id",
+                foreignKey: "categoryId",
                 as: "category"
             });
         }
@@ -26,11 +26,11 @@ module.exports = (sequelize, DataTypes) => {
                 unique: true,
                 defaultValue: DataTypes.UUIDV4
             },
-            product_id: {
+            productId: {
                 type: DataTypes.UUID,
                 allowNull: false
             },
-            category_id: {
+            categoryId: {
                 type: DataTypes.UUID,
                 allowNull: false
             }
@@ -39,9 +39,8 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: 'ProductCategory',
             tableName: 'products_categories',
-            createdAt: 'created_at',
-            updatedAt: 'updated_at',
-            timestamps: true
+            timestamps: true,
+            underscored: true
         }
     );
 

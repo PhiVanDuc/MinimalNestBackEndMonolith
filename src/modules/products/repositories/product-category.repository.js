@@ -7,7 +7,7 @@ module.exports = {
     ...baseRepository,
 
     addCategoriesToProduct: async ({ productId, categories, options = {} } = {}) => {
-        const records = categories.map(category => ({ product_id: productId, category_id: category.id }));
+        const records = categories.map(category => ({ productId: productId, categoryId: category.id }));
         return ProductCategory.bulkCreate(records, options);
     }
 }

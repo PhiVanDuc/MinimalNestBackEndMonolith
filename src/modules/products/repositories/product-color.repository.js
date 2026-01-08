@@ -7,7 +7,7 @@ module.exports = {
     ...baseRepository,
     
     addColorsToProduct: async ({ productId, colors, options = {} } = {}) => {
-        const records = colors.map(color => ({ product_id: productId, color_id: color.id }));
+        const records = colors.map(color => ({ productId: productId, colorId: color.id }));
         return ProductColor.bulkCreate(records, options);
     }
 }
