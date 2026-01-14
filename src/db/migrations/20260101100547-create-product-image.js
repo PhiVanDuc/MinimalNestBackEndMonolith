@@ -28,6 +28,10 @@ module.exports = {
                 type: Sequelize.TEXT,
                 allowNull: false
             },
+            blur_url: {
+                type: Sequelize.TEXT,
+                allowNull: false
+            },
             role: {
                 type: Sequelize.STRING,
                 allowNull: false

@@ -5,4 +5,16 @@ const baseRepository = createBaseRepository(Product);
 
 module.exports = {
     ...baseRepository,
+
+    paginateProducts: async ({ page, limit, filter, options = {} } = {}) => {
+        const whereConfig = {
+            name: (value) => {
+                return {
+                    [Op.iLike]: `%${value}%`
+                }
+            }
+        }
+
+        return baseRepository.findAndCountAll({ page, limit, filter, whereConfig, options });
+    }
 }

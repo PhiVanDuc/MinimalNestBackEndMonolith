@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.TEXT,
                 allowNull: false
             },
+            blurUrl: {
+                type: DataTypes.TEXT,
+                allowNull: false
+            },
             role: {
                 type: DataTypes.STRING,
                 allowNull: false
